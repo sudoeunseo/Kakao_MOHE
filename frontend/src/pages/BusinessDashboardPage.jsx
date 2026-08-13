@@ -1,13 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { api, formatDate, formatWon } from "../api/client";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { api, formatWon } from "../api/client";
 import Layout from "../components/Layout";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+const STATUS_STEPS = [
+  { key: "pending", label: "신규 접수" },
+  { key: "paid", label: "결제완료" },
+  { key: "shipping", label: "국제운송" },
+  { key: "customs", label: "통관" },
+  { key: "delivered", label: "배송완료" },
+];
+
 function BusinessDashboardPage() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [trend, setTrend] = useState(null);
+  const [trendLoading, setTrendLoading] = useState(true);
+  const [trendError, setTrendError] = useState("");
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -15,9 +28,6 @@ function BusinessDashboardPage() {
     try {
       const result = await api("/api/orders/all");
       setOrders(result);
-      setSelectedOrder((current) =>
-        result.find((order) => order.id === current?.id) || result[0] || null,
-      );
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -25,9 +35,23 @@ function BusinessDashboardPage() {
     }
   }, []);
 
+  const loadTrend = useCallback(async () => {
+    setTrendLoading(true);
+    setTrendError("");
+    try {
+      const result = await api("/api/business-trend");
+      setTrend(result);
+    } catch (requestError) {
+      setTrendError(requestError.message);
+    } finally {
+      setTrendLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadOrders();
-  }, [loadOrders]);
+    loadTrend();
+  }, [loadOrders, loadTrend]);
 
   const metrics = useMemo(() => {
     const totalCost = orders.reduce(
@@ -36,21 +60,29 @@ function BusinessDashboardPage() {
     );
     const riskOrders = orders.filter(
       (order) => (order.ai_estimate?.risk_notes?.length || 0) > 0,
-    ).length;
+    );
     const dutyFree = orders.filter(
       (order) => order.ai_estimate?.is_duty_free_likely,
     ).length;
-    return { totalCost, riskOrders, dutyFree };
+    const statusCounts = STATUS_STEPS.reduce((acc, step) => {
+      acc[step.key] = orders.filter((order) => order.status === step.key).length;
+      return acc;
+    }, {});
+    return { totalCost, riskOrders, dutyFree, statusCounts };
   }, [orders]);
-
-  const estimate = selectedOrder?.ai_estimate;
 
   return (
     <Layout
-      title="Global Flow Control Tower"
+      title="홈"
       description="B2C 주문과 AI 통관 분석을 연결해 운영 위험을 한눈에 파악합니다."
       actions={
-        <button className="secondary-action compact-action" onClick={loadOrders}>
+        <button
+          className="secondary-action compact-action"
+          onClick={() => {
+            loadOrders();
+            loadTrend();
+          }}
+        >
           데이터 새로고침
         </button>
       }
@@ -68,7 +100,7 @@ function BusinessDashboardPage() {
         </article>
         <article className="metric-card warning-metric">
           <span>주의 필요 주문</span>
-          <strong>{metrics.riskOrders}<small>건</small></strong>
+          <strong>{metrics.riskOrders.length}<small>건</small></strong>
           <p>통관 위험요소 사전 확인</p>
         </article>
         <article className="metric-card">
@@ -79,13 +111,16 @@ function BusinessDashboardPage() {
       </section>
 
       <section className="operation-strip">
-        <div><span className="operation-dot active" /><strong>OMS</strong><small>주문 수집</small></div>
-        <span>→</span>
-        <div><span className="operation-dot active" /><strong>Customs AI</strong><small>품목·관세 예측</small></div>
-        <span>→</span>
-        <div><span className="operation-dot" /><strong>WMS</strong><small>센터 배정</small></div>
-        <span>→</span>
-        <div><span className="operation-dot" /><strong>Kakao T</strong><small>배송 실행</small></div>
+        {STATUS_STEPS.map((step, index) => (
+          <Fragment key={step.key}>
+            {index > 0 && <span>→</span>}
+            <div>
+              <span className={`operation-dot ${metrics.statusCounts[step.key] > 0 ? "active" : ""}`} />
+              <strong>{step.label}</strong>
+              <small>{metrics.statusCounts[step.key] || 0}건</small>
+            </div>
+          </Fragment>
+        ))}
       </section>
 
       {loading ? (
@@ -96,76 +131,68 @@ function BusinessDashboardPage() {
           <p>{error}</p>
           <button className="secondary-action" onClick={loadOrders}>다시 시도</button>
         </div>
-      ) : orders.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-symbol">B2B</span>
-          <strong>아직 연동된 주문이 없습니다.</strong>
-          <p>구매자 계정에서 주문을 생성하면 이곳에 즉시 표시됩니다.</p>
-        </div>
       ) : (
-        <div className="dashboard-grid">
-          <section className="content-card orders-table-card">
+        <div className="home-grid">
+          <section className="content-card action-card">
             <div className="card-heading-row">
-              <div><span>LIVE ORDERS</span><h2>통합 주문 현황</h2></div>
-              <small>최근 주문순</small>
+              <div><span>ACTION NEEDED</span><h2>확인이 필요한 업무</h2></div>
+              <button className="secondary-action compact-action" onClick={() => navigate("/business/orders")}>
+                주문 관리로 이동
+              </button>
             </div>
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr><th>주문</th><th>상품</th><th>출발국</th><th>예상금액</th><th>AI 신뢰도</th><th>상태</th></tr>
-                </thead>
-                <tbody>
-                  {orders.map((order) => (
-                    <tr
-                      key={order.id}
-                      className={selectedOrder?.id === order.id ? "selected-row" : ""}
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <td>#{String(order.id).padStart(4, "0")}</td>
-                      <td><strong>{order.product_name}</strong><small>{formatDate(order.created_at)}</small></td>
-                      <td>{order.origin_country || "-"}</td>
-                      <td>{order.ai_estimate ? formatWon(order.ai_estimate.breakdown?.total_estimated_krw) : "분석 없음"}</td>
-                      <td><span className={`confidence-tag ${order.ai_estimate?.confidence || "none"}`}>{order.ai_estimate?.confidence || "-"}</span></td>
-                      <td><span className="status-tag">결제 완료</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {metrics.riskOrders.length === 0 ? (
+              <p className="action-empty">현재 AI가 감지한 통관 위험 주문이 없습니다.</p>
+            ) : (
+              <ul className="action-list">
+                {metrics.riskOrders.slice(0, 5).map((order) => (
+                  <li key={order.id}>
+                    <span className="action-icon">!</span>
+                    <div>
+                      <strong>{order.product_name}</strong>
+                      <small>
+                        #{String(order.id).padStart(4, "0")} · {order.ai_estimate.risk_notes[0]}
+                      </small>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
 
-          <aside className="order-detail-card">
-            <div className="detail-heading">
-              <span>ORDER INSIGHT</span>
-              <h2>주문 #{String(selectedOrder.id).padStart(4, "0")}</h2>
-              <p>{selectedOrder.product_name}</p>
+          <section className="ai-briefing">
+            <div className="card-heading-row">
+              <div><span>MOHE AI</span><h2>수요·수익 브리핑</h2></div>
+              {trend && <span className={`confidence-tag ${trend.confidence}`}>{trend.confidence}</span>}
             </div>
 
-            <div className="detail-route">
-              <div><span>출발</span><strong>{selectedOrder.origin_country || "-"}</strong></div>
-              <div className="route-line"><span>AI 분석 완료</span></div>
-              <div><span>도착</span><strong>KR</strong></div>
-            </div>
-
-            {estimate ? (
-              <>
-                <div className="detail-grid">
-                  <div><span>품목 분류</span><strong>{estimate.category}</strong></div>
-                  <div><span>HS Code</span><strong>{estimate.hs_code_guess}</strong></div>
-                  <div><span>관세율</span><strong>{estimate.duty_rate_percent}%</strong></div>
-                  <div><span>최종비용</span><strong>{formatWon(estimate.breakdown?.total_estimated_krw)}</strong></div>
-                </div>
-                <div className="detail-risk">
-                  <strong>AI 통관 체크</strong>
-                  {estimate.risk_notes?.length ? (
-                    <ul>{estimate.risk_notes.map((risk) => <li key={risk}>{risk}</li>)}</ul>
-                  ) : <p>현재 주요 위험요소가 없습니다.</p>}
-                </div>
-              </>
+            {trendLoading ? (
+              <LoadingSpinner label="AI가 누적 주문을 분석하고 있습니다" />
+            ) : trendError ? (
+              <p className="action-empty">브리핑을 불러오지 못했습니다: {trendError}</p>
             ) : (
-              <div className="detail-risk"><p>이 주문에는 AI 분석 결과가 없습니다.</p></div>
+              <>
+                <p className="briefing-summary">{trend.summary}</p>
+                <div className="briefing-grid">
+                  <div>
+                    <span>다음달 예상 매출</span>
+                    <strong>{formatWon(trend.estimated_next_month_revenue_krw)}</strong>
+                  </div>
+                  <div>
+                    <span>다음달 예상 순이익</span>
+                    <strong>{formatWon(trend.estimated_next_month_profit_krw)}</strong>
+                  </div>
+                </div>
+                {trend.recommendations?.length > 0 && (
+                  <ul className="briefing-list">
+                    {trend.recommendations.map((rec) => <li key={rec}>{rec}</li>)}
+                  </ul>
+                )}
+                <button className="secondary-action compact-action briefing-more" onClick={() => navigate("/business/revenue")}>
+                  통계·분석에서 자세히 보기
+                </button>
+              </>
             )}
-          </aside>
+          </section>
         </div>
       )}
 

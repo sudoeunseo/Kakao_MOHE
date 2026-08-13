@@ -5,10 +5,13 @@ import {
   Routes,
 } from "react-router-dom";
 
+import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import EstimatePage from "./pages/EstimatePage";
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
+import BusinessOrdersPage from "./pages/BusinessOrdersPage";
+import BusinessRevenuePage from "./pages/BusinessRevenuePage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import KakaoCallbackPage from "./pages/KakaoCallbackPage";
@@ -45,7 +48,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
@@ -95,6 +98,24 @@ function App() {
           element={
             <RoleRoute role="business">
               <BusinessDashboardPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/business/orders"
+          element={
+            <RoleRoute role="business">
+              <BusinessOrdersPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/business/revenue"
+          element={
+            <RoleRoute role="business">
+              <BusinessRevenuePage />
             </RoleRoute>
           }
         />

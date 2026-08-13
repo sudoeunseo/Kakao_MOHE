@@ -20,18 +20,20 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 20px;
-  font-weight: 800;
 }
 
 .brand-mark {
-  width: 40px;
-  height: 40px;
+  padding: 10px 14px;
   display: grid;
   place-items: center;
-  border-radius: 13px;
-  color: #171717;
-  background: #fee500;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.brand-mark img {
+  display: block;
+  height: 26px;
+  width: auto;
 }
 
 .introduction-content {
@@ -106,8 +108,7 @@
 
 .mobile-brand {
   display: none;
-  color: #17213a;
-  font-weight: 800;
+  height: 28px;
 }
 
 .login-heading h2 {

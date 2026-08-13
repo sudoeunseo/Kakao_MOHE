@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api, getApiUrl } from "../api/client";
+import logo from "../assets/logo.png";
 import "./LoginPage.css";
 
 const DEMO_ACCOUNTS = {
@@ -121,8 +122,9 @@ function LoginPage() {
     <main className="login-page">
       <section className="login-introduction">
         <div className="brand">
-          <span className="brand-mark">M</span>
-          <span>Kakao MOHE</span>
+          <span className="brand-mark">
+            <img src={logo} alt="Kakao MOHE" />
+          </span>
         </div>
 
         <div className="introduction-content">
@@ -161,7 +163,7 @@ function LoginPage() {
       <section className="login-panel">
         <div className="login-card">
           <div className="login-heading">
-            <span className="mobile-brand">Kakao MOHE</span>
+            <img className="mobile-brand" src={logo} alt="Kakao MOHE" />
             <h2>로그인</h2>
             <p>MOHE 서비스를 시작해 보세요.</p>
           </div>
