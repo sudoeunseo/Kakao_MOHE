@@ -203,7 +203,7 @@ function EstimatePage() {
       title="관세·최종비용 계산하기"
       description={`${user.name}님, 상품 링크를 입력하면 AI가 상품 정보와 통관 비용을 한 번에 분석합니다.`}
     >
-      <div className="estimate-layout">
+      <div className={`estimate-layout ${estimate ? "has-result" : ""}`}>
         <section className="content-card form-card">
           <div className="section-title">
             <span>AI ANALYSIS</span>
@@ -359,26 +359,26 @@ function EstimatePage() {
           </form>
         </section>
 
-        <aside className="process-card">
-          <span className="process-label">MOHE AI PROCESS</span>
-          <h2>하나의 상품 정보로<br />통관 비용까지 계산해요</h2>
-          <ol>
-            <li><span>01</span><div><strong>품목 자동 분류</strong><p>상품명을 분석해 카테고리와 HS Code를 추정합니다.</p></div></li>
-            <li><span>02</span><div><strong>관세·부가세 예측</strong><p>출발 국가와 면세 기준을 함께 검토합니다.</p></div></li>
-            <li><span>03</span><div><strong>최종비용 산출</strong><p>배송비와 수수료까지 한 번에 합산합니다.</p></div></li>
-          </ol>
-        </aside>
+        {estimate ? (
+          <EstimatingResult
+            estimate={estimate}
+            onOrder={handleOrder}
+            onKakaoPay={handleKakaoPay}
+            orderLoading={orderLoading}
+            paymentLoading={paymentLoading}
+          />
+        ) : (
+          <aside className="process-card">
+            <span className="process-label">MOHE AI PROCESS</span>
+            <h2>하나의 상품 정보로<br />통관 비용까지 계산해요</h2>
+            <ol>
+              <li><span>01</span><div><strong>품목 자동 분류</strong><p>상품명을 분석해 카테고리와 HS Code를 추정합니다.</p></div></li>
+              <li><span>02</span><div><strong>관세·부가세 예측</strong><p>출발 국가와 면세 기준을 함께 검토합니다.</p></div></li>
+              <li><span>03</span><div><strong>최종비용 산출</strong><p>배송비와 수수료까지 한 번에 합산합니다.</p></div></li>
+            </ol>
+          </aside>
+        )}
       </div>
-
-      {estimate && (
-        <EstimatingResult
-          estimate={estimate}
-          onOrder={handleOrder}
-          onKakaoPay={handleKakaoPay}
-          orderLoading={orderLoading}
-          paymentLoading={paymentLoading}
-        />
-      )}
     </Layout>
   );
 }

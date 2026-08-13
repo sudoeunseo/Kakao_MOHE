@@ -12,9 +12,16 @@ const BUSINESS_NAV = [
 ];
 
 const BUYER_MENU = [
-  ["/buyer/home", "⌂", "홈"],
-  ["/buyer/estimate", "⌕", "상품 분석·관세 계산"],
-  ["/buyer/orders", "▤", "내 주문·배송 조회"],
+  ["/buyer/home", "home", "홈"],
+  ["/buyer/products", "search", "상품 찾기"],
+  ["/buyer/shops", "storefront", "해외 쇼핑몰"],
+  ["/buyer/recommendations", "smart_toy", "AI 추천"],
+  ["/buyer/estimate", "calculate", "관세 계산하기"],
+  ["/buyer/orders", "local_shipping", "배송조회"],
+  ["/buyer/customs", "gavel", "통관·관세"],
+  ["/buyer/forwarding", "hub", "MOHE 해외배송센터"],
+  ["/buyer/payments", "receipt_long", "결제·납부내역"],
+  ["/buyer/profile", "person", "마이페이지"],
 ];
 
 function Layout({ children, title, description, actions, topbarTitle }) {
@@ -56,8 +63,8 @@ function Layout({ children, title, description, actions, topbarTitle }) {
             )
           ) : (
             BUYER_MENU.map(([to, icon, label]) => (
-              <NavLink key={to} to={to}>
-                <span className="buyer-nav-icon" aria-hidden="true">{icon}</span>
+              <NavLink key={to} to={to} end={to === "/buyer/home"}>
+                <span className="buyer-nav-icon material-symbols-outlined" aria-hidden="true">{icon}</span>
                 <span>{label}</span>
               </NavLink>
             ))
