@@ -4,6 +4,37 @@ import { api } from "../api/client";
 import EstimatingResult from "../components/EstimatingResult";
 import Layout from "../components/Layout";
 
+const CURRENCY_OPTIONS = [
+  ["USD", "미국 달러"],
+  ["JPY", "일본 엔"],
+  ["EUR", "유로"],
+  ["CNY", "중국 위안"],
+  ["KRW", "대한민국 원"],
+  ["GBP", "영국 파운드"],
+  ["CAD", "캐나다 달러"],
+  ["AUD", "호주 달러"],
+];
+
+const COUNTRY_OPTIONS = [
+  ["US", "미국"],
+  ["JP", "일본"],
+  ["CN", "중국"],
+  ["KR", "대한민국"],
+  ["DE", "독일"],
+  ["GB", "영국"],
+  ["FR", "프랑스"],
+  ["IT", "이탈리아"],
+  ["ES", "스페인"],
+  ["CA", "캐나다"],
+  ["AU", "호주"],
+];
+
+const CONFIDENCE_LABEL = {
+  high: "신뢰도 높음",
+  medium: "신뢰도 보통",
+  low: "확인 필요",
+};
+
 function EstimatePage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("moheUser") || "{}");
@@ -12,11 +43,13 @@ function EstimatePage() {
     productUrl: "",
     priceAmount: "",
     priceCurrency: "USD",
-    originCountry: "US",
+    originCountry: "",
     shippingMode: "forwarding",
   });
   const [estimate, setEstimate] = useState(null);
+  const [productAnalysis, setProductAnalysis] = useState(null);
   const [error, setError] = useState("");
+  const [analyzingUrl, setAnalyzingUrl] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -24,6 +57,7 @@ function EstimatePage() {
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
+    if (name === "productUrl") setProductAnalysis(null);
     setEstimate(null);
     setError("");
   }
@@ -37,8 +71,41 @@ function EstimatePage() {
       originCountry: "US",
       shippingMode: "forwarding",
     });
+    setProductAnalysis(null);
     setEstimate(null);
     setError("");
+  }
+
+  async function handleProductUrlAnalysis() {
+    if (!form.productUrl) {
+      setError("분석할 상품 URL을 입력해 주세요.");
+      return;
+    }
+
+    setAnalyzingUrl(true);
+    setProductAnalysis(null);
+    setEstimate(null);
+    setError("");
+
+    try {
+      const result = await api("/api/product/analyze", {
+        method: "POST",
+        body: JSON.stringify({ productUrl: form.productUrl }),
+      });
+
+      setForm((previous) => ({
+        ...previous,
+        productName: result.productName || previous.productName,
+        priceAmount: result.priceAmount ? String(result.priceAmount) : previous.priceAmount,
+        priceCurrency: result.priceCurrency || previous.priceCurrency,
+        originCountry: result.originCountry || previous.originCountry,
+      }));
+      setProductAnalysis(result);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setAnalyzingUrl(false);
+    }
   }
 
   async function handleEstimate(event) {
@@ -149,32 +216,58 @@ function EstimatePage() {
 
           <form className="estimate-form" onSubmit={handleEstimate}>
             <label className="field full-field">
-              <span>상품명</span>
+              <span>상품 URL <small>AI 자동 입력</small></span>
+              <div className="url-analysis-row">
+                <input
+                  name="productUrl"
+                  type="url"
+                  value={form.productUrl}
+                  onChange={handleChange}
+                  placeholder="https://www.amazon.com/..."
+                />
+                <button
+                  type="button"
+                  className="url-analysis-button"
+                  onClick={handleProductUrlAnalysis}
+                  disabled={analyzingUrl || !form.productUrl}
+                >
+                  {analyzingUrl ? (
+                    <><span className="button-spinner" /> 분석 중</>
+                  ) : (
+                    "AI로 정보 가져오기"
+                  )}
+                </button>
+              </div>
+              <small className="field-help">
+                공개된 상품 페이지에서 상품명·가격·통화·출발 국가를 찾아 자동으로 채웁니다.
+              </small>
+            </label>
+
+            {productAnalysis && (
+              <div className={`url-analysis-result ${productAnalysis.confidence || "low"}`}>
+                <div>
+                  <strong>상품 정보 자동 입력 완료</strong>
+                  <span>{CONFIDENCE_LABEL[productAnalysis.confidence] || "확인 필요"}</span>
+                </div>
+                <p>{productAnalysis.analysisSource}</p>
+                {productAnalysis.warning && <small>{productAnalysis.warning}</small>}
+                <small>자동 입력값은 판매 페이지와 결제 단계에서 한 번 더 확인해 주세요.</small>
+              </div>
+            )}
+
+            <label className="field full-field">
+              <span>상품명 <small>{productAnalysis?.productName ? "자동 입력됨" : ""}</small></span>
               <input
                 name="productName"
                 value={form.productName}
                 onChange={handleChange}
-                placeholder="예: Nike Air Max 90 운동화"
+                placeholder="URL 분석 또는 직접 입력"
                 required
               />
             </label>
 
-            <label className="field full-field">
-              <span>상품 URL <small>선택 · 주문 참고용</small></span>
-              <input
-                name="productUrl"
-                type="url"
-                value={form.productUrl}
-                onChange={handleChange}
-                placeholder="https://"
-              />
-              <small className="field-help">
-                아래 정보를 직접 입력해 주세요.
-              </small>
-            </label>
-
             <label className="field">
-              <span>상품 가격 <small>직접 입력</small></span>
+              <span>상품 가격 <small>{productAnalysis?.priceAmount ? "자동 입력됨" : ""}</small></span>
               <input
                 name="priceAmount"
                 type="number"
@@ -193,11 +286,12 @@ function EstimatePage() {
                 value={form.priceCurrency}
                 onChange={handleChange}
               >
-                <option value="USD">USD · 미국 달러</option>
-                <option value="JPY">JPY · 일본 엔</option>
-                <option value="EUR">EUR · 유로</option>
-                <option value="CNY">CNY · 중국 위안</option>
-                <option value="KRW">KRW · 대한민국 원</option>
+                {!CURRENCY_OPTIONS.some(([code]) => code === form.priceCurrency) && (
+                  <option value={form.priceCurrency}>{form.priceCurrency}</option>
+                )}
+                {CURRENCY_OPTIONS.map(([code, label]) => (
+                  <option key={code} value={code}>{code} · {label}</option>
+                ))}
               </select>
             </label>
 
@@ -207,12 +301,15 @@ function EstimatePage() {
                 name="originCountry"
                 value={form.originCountry}
                 onChange={handleChange}
+                required
               >
-                <option value="US">미국</option>
-                <option value="JP">일본</option>
-                <option value="CN">중국</option>
-                <option value="DE">독일</option>
-                <option value="GB">영국</option>
+                <option value="">출발 국가 선택</option>
+                {!COUNTRY_OPTIONS.some(([code]) => code === form.originCountry) && form.originCountry && (
+                  <option value={form.originCountry}>{form.originCountry}</option>
+                )}
+                {COUNTRY_OPTIONS.map(([code, label]) => (
+                  <option key={code} value={code}>{label}</option>
+                ))}
               </select>
             </label>
 

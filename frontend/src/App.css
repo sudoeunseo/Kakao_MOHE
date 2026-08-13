@@ -63,6 +63,20 @@ button { border: 0; }
 .field .field-help { margin-top: -2px; color: #8b94a4; font-size: 10px; line-height: 1.45; }
 .field input, .field select { width: 100%; height: 50px; padding: 0 14px; border: 1px solid #dce1e9; border-radius: 11px; outline: 0; color: var(--navy); background: white; }
 .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(61,109,242,.1); }
+.url-analysis-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; }
+.url-analysis-button { min-width: 168px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 11px; color: var(--navy); background: var(--yellow); font-size: 12px; font-weight: 900; cursor: pointer; }
+.url-analysis-button:hover { background: var(--yellow-hover); transform: translateY(-1px); }
+.url-analysis-button:disabled { opacity: .55; cursor: wait; transform: none; }
+.url-analysis-button .button-spinner { border-color: rgba(23,33,58,.25); border-top-color: var(--navy); }
+.url-analysis-result { grid-column: 1 / -1; padding: 14px 16px; display: grid; gap: 5px; border: 1px solid #c9e5da; border-radius: 12px; background: #f0faf6; }
+.url-analysis-result.medium { border-color: #e9ddaa; background: #fffbed; }
+.url-analysis-result.low { border-color: #efd1bc; background: #fff8f2; }
+.url-analysis-result > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.url-analysis-result strong { color: var(--navy); font-size: 12px; }
+.url-analysis-result span { padding: 4px 7px; border-radius: 6px; color: #137454; background: #dff4eb; font-size: 9px; font-weight: 900; }
+.url-analysis-result.medium span { color: #8a6900; background: #fff0b8; }
+.url-analysis-result.low span { color: #a35424; background: #ffe6d5; }
+.url-analysis-result p, .url-analysis-result small { margin: 0; color: #687285; font-size: 10px; line-height: 1.5; }
 .full-field { grid-column: 1 / -1; }
 .shipping-field { grid-column: 1 / -1; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border: 0; }
 .shipping-field legend { margin-bottom: 8px; }
@@ -295,6 +309,8 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
   .page-actions { width: 100%; }
   .page-actions button { width: 100%; }
   .estimate-form { grid-template-columns: 1fr; }
+  .url-analysis-row { grid-template-columns: 1fr; }
+  .url-analysis-button { min-height: 48px; }
   .section-title { flex-wrap: wrap; }
   .sample-button { width: 100%; margin-left: 0; }
   .full-field, .shipping-field { grid-column: auto; }
