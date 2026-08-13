@@ -1,11 +1,15 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
+export function getApiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
+
 export async function api(path, options = {}) {
   let response;
 
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
+    response = await fetch(getApiUrl(path), {
       ...options,
       headers: {
         "Content-Type": "application/json",

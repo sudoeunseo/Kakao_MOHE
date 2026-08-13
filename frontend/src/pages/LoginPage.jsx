@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { api } from "../api/client";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { api, getApiUrl } from "../api/client";
 import "./LoginPage.css";
 
 const DEMO_ACCOUNTS = {
@@ -20,6 +20,7 @@ const DEMO_ACCOUNTS = {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [form, setForm] = useState({
     email: "",
@@ -27,7 +28,14 @@ function LoginPage() {
   });
 
   const [loading, setLoading] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(searchParams.get("kakao_error") || "");
+  const [kakaoStatus, setKakaoStatus] = useState({ loading: true, configured: false });
+
+  useEffect(() => {
+    api("/api/auth/kakao/status")
+      .then((status) => setKakaoStatus({ loading: false, ...status }))
+      .catch(() => setKakaoStatus({ loading: false, configured: false }));
+  }, []);
 
   function moveToUserPage(user) {
     localStorage.setItem("moheUser", JSON.stringify(user));
@@ -101,6 +109,12 @@ function LoginPage() {
     } finally {
       setLoading("");
     }
+  }
+
+  function handleKakaoLogin() {
+    setError("");
+    setLoading("kakao");
+    window.location.assign(getApiUrl("/api/auth/kakao/start"));
   }
 
   return (
@@ -188,8 +202,30 @@ function LoginPage() {
             </button>
           </form>
 
+          <button
+            type="button"
+            className="kakao-login-button"
+            onClick={handleKakaoLogin}
+            disabled={Boolean(loading) || kakaoStatus.loading || !kakaoStatus.configured}
+          >
+            <span className="kakao-talk-mark" aria-hidden="true">●</span>
+            {loading === "kakao"
+              ? "카카오 로그인으로 이동 중..."
+              : kakaoStatus.loading
+                ? "카카오 로그인 확인 중..."
+                : kakaoStatus.configured
+                  ? "카카오로 시작하기"
+                  : "카카오 로그인 설정 필요"}
+          </button>
+
+          {!kakaoStatus.loading && !kakaoStatus.configured && (
+            <p className="kakao-config-notice">
+              서버의 KAKAO_REST_API_KEY를 설정하면 버튼이 활성화됩니다.
+            </p>
+          )}
+
           <div className="divider">
-            <span>빠른 데모 시작</span>
+            <span>또는 데모 계정으로 시작</span>
           </div>
 
           <div className="demo-buttons">

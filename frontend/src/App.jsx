@@ -11,6 +11,7 @@ import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
+import KakaoCallbackPage from "./pages/KakaoCallbackPage";
 import "./App.css";
 
 function getStoredUser() {
@@ -47,6 +48,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
 
         <Route
           path="/buyer/estimate"

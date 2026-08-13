@@ -18,6 +18,8 @@ npm run dev
 | GET | `/health` | 서버 살아있는지 확인 |
 | POST | `/api/auth/signup` | 회원가입 `{email, password, name, role}` (role: buyer\|business) |
 | POST | `/api/auth/login` | 로그인 `{email, password}` → `{id, email, name, role}` 반환. **프론트는 이 role로 화면 분기** |
+| GET | `/api/auth/kakao/start` | 카카오 로그인 인가 화면으로 이동 |
+| GET | `/api/auth/kakao/callback` | 카카오 인가 코드 처리 및 MOHE 사용자 가입/로그인 |
 | POST | `/api/estimate` | AI 비용예측 `{productName, priceAmount, priceCurrency, originCountry, shippingMode}` → 예측 JSON |
 | POST | `/api/kakaopay/ready` | 카카오페이 결제 준비 → 결제창 URL 반환 |
 | POST | `/api/kakaopay/approve` | 카카오페이 결제 승인 → 이 시점에 주문이 DB에 저장됨 |
@@ -27,6 +29,27 @@ npm run dev
 | GET | `/api/orders/all` | 전체 주문 목록 (기업/비즈니스 주문관리 화면용) |
 | GET | `/api/orders/:id` | 주문 단건 조회 |
 | PATCH | `/api/orders/:id` | 주문 상태 변경 `{status}` (status: pending\|paid\|shipping\|customs\|delivered) — 기업 주문관리 화면용 |
+
+## 카카오 로그인 설정
+
+1. 카카오 개발자센터에서 앱을 만들고 **카카오 로그인 > 사용 설정**을 ON으로 변경합니다.
+2. **플랫폼 키 > REST API 키**에서 아래 Redirect URI를 등록합니다.
+
+```text
+http://localhost:4000/api/auth/kakao/callback
+```
+
+3. REST API 키의 **클라이언트 시크릿**이 활성화되어 있다면 시크릿도 복사합니다.
+4. `.env`에 아래 값을 입력하고 백엔드를 다시 시작합니다.
+
+```env
+KAKAO_REST_API_KEY=카카오_REST_API_키
+KAKAO_CLIENT_SECRET=카카오_클라이언트_시크릿
+KAKAO_REDIRECT_URI=http://localhost:4000/api/auth/kakao/callback
+FRONTEND_URL=http://localhost:5173
+```
+
+배포 시에는 `KAKAO_REDIRECT_URI`와 `FRONTEND_URL`을 각각 배포된 백엔드와 프론트 주소로 바꾸고, 배포용 Redirect URI도 카카오 개발자센터에 추가해야 합니다.
 
 ## 설계 원칙 (시간 없을 때 왜 이렇게 짰는지)
 
