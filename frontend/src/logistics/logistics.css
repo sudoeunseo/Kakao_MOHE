@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.logistics-root {
+  min-width: 320px;
+  min-height: 100vh;
+  color: #191c1e;
+  background: #f8f9fb;
+  font-family: "Plus Jakarta Sans", Pretendard, "Noto Sans KR", system-ui, sans-serif;
+}
+
+:where(.logistics-root *, .logistics-root *::before, .logistics-root *::after) {
+  box-sizing: border-box;
+}
+
+:where(.logistics-root h1, .logistics-root h2, .logistics-root h3, .logistics-root h4, .logistics-root p, .logistics-root dl, .logistics-root dd) {
+  margin: 0;
+}
+
+:where(.logistics-root ul, .logistics-root ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.logistics-root button, .logistics-root input, .logistics-root select, .logistics-root textarea) {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+}
+
+:where(.logistics-root button) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+:where(.logistics-root img, .logistics-root svg) {
+  display: block;
+  max-width: 100%;
+}
+
+.logistics-root .hero-gradient {
+  background: linear-gradient(135deg, rgb(8 21 46 / 92%) 0%, rgb(8 21 46 / 50%) 100%);
+}
+
+.logistics-root .material-symbols-outlined {
+  display: inline-block;
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}

@@ -5,19 +5,8 @@ import {
   Routes,
 } from "react-router-dom";
 
-import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import BuyerHomePage from "./pages/BuyerHomePage";
-import {
-  BuyerAiPage,
-  BuyerCustomsPage,
-  BuyerForwardingPage,
-  BuyerPaymentsPage,
-  BuyerProductDetailPage,
-  BuyerProductsPage,
-  BuyerProfilePage,
-  BuyerShopsPage,
-} from "./pages/BuyerShowcasePages";
+import { BuyerProductDetailPage } from "./pages/BuyerShowcasePages";
 import EstimatePage from "./pages/EstimatePage";
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
@@ -29,6 +18,8 @@ import InquiriesPreviewPage from "./pages/InquiriesPreviewPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import KakaoCallbackPage from "./pages/KakaoCallbackPage";
+import B2CPortalPage from "./logistics/B2CPortalPage";
+import LogisticsLandingPage from "./logistics/LogisticsLandingPage";
 import LanguageProvider from "./context/LanguageProvider";
 import "./App.css";
 
@@ -64,19 +55,10 @@ function App() {
     <BrowserRouter>
       <LanguageProvider>
         <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<LogisticsLandingPage />} />
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
-
-        <Route
-          path="/buyer/home"
-          element={
-            <RoleRoute role="buyer">
-              <BuyerHomePage />
-            </RoleRoute>
-          }
-        />
 
         <Route
           path="/buyer/estimate"
@@ -87,14 +69,7 @@ function App() {
           }
         />
 
-        <Route path="/buyer/products" element={<RoleRoute role="buyer"><BuyerProductsPage /></RoleRoute>} />
-        <Route path="/buyer/shops" element={<RoleRoute role="buyer"><BuyerShopsPage /></RoleRoute>} />
-        <Route path="/buyer/recommendations" element={<RoleRoute role="buyer"><BuyerAiPage /></RoleRoute>} />
         <Route path="/buyer/recommendations/:productId" element={<RoleRoute role="buyer"><BuyerProductDetailPage /></RoleRoute>} />
-        <Route path="/buyer/customs" element={<RoleRoute role="buyer"><BuyerCustomsPage /></RoleRoute>} />
-        <Route path="/buyer/forwarding" element={<RoleRoute role="buyer"><BuyerForwardingPage /></RoleRoute>} />
-        <Route path="/buyer/payments" element={<RoleRoute role="buyer"><BuyerPaymentsPage /></RoleRoute>} />
-        <Route path="/buyer/profile" element={<RoleRoute role="buyer"><BuyerProfilePage /></RoleRoute>} />
 
         <Route
           path="/buyer/orders"
@@ -126,6 +101,15 @@ function App() {
         <Route path="/payment/fail" element={<PaymentFailPage />} />
         <Route path="/pages/payment-fail.html" element={<PaymentFailPage />} />
         <Route path="/pages/payment-cancel.html" element={<PaymentFailPage />} />
+
+        <Route
+          path="/buyer/*"
+          element={
+            <RoleRoute role="buyer">
+              <B2CPortalPage />
+            </RoleRoute>
+          }
+        />
 
         <Route
           path="/business/dashboard"
