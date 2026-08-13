@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { api, formatDate, formatWon } from "../api/client";
 import Layout from "../components/Layout";
 
@@ -21,11 +22,39 @@ const CATEGORIES = [
 ];
 
 const SHOPS = [
-  ["Amazon", "미국", "세계 최대 규모의 종합 쇼핑몰", "인기 급상승"],
-  ["Rakuten", "일본", "피규어·전자기기·잡화 특화", "포인트 2배"],
-  ["Taobao", "중국", "가격과 상품 선택 폭이 큰 마켓", "종합 쇼핑"],
-  ["AliExpress", "글로벌", "전 세계 배송을 지원하는 마켓", "무료배송 많음"],
+  ["Amazon", "미국", "세계 최대 규모의 종합 쇼핑몰", "인기 급상승", "https://www.amazon.com/"],
+  ["Rakuten", "일본", "피규어·전자기기·잡화 특화", "포인트 2배", "https://www.rakuten.co.jp/"],
+  ["Taobao", "중국", "가격과 상품 선택 폭이 큰 마켓", "종합 쇼핑", "https://www.taobao.com/"],
+  ["AliExpress", "글로벌", "전 세계 배송을 지원하는 마켓", "무료배송 많음", "https://www.aliexpress.com/"],
 ];
+
+const FEATURED_AI_PRODUCT = {
+  id: "terminal-connectors-1000",
+  name: "AWG 18–22 비절연 압착 커넥터 1000개",
+  originalName: "1000pcs/bag AWG 18-22 Terminal Crimp Butt Splice Connectors",
+  seller: "Zhejiang Haner Plastic Co., Ltd.",
+  sourceUrl: "https://www.alibaba.com/product-detail/1000pcs-bag-Ready-to-Ship-AWG_1600636204276.html",
+  price: "$8.50",
+  samplePrice: "$9.50 / bag",
+  origin: "중국 저장성",
+  summary: "저전압 전기 배선에 사용하는 비절연 압착 슬리브 커넥터입니다. 구리 소재에 주석 도금 처리가 적용됐으며 한 봉지에 1,000개가 들어 있습니다.",
+  images: [
+    "/products/terminal-connectors-1000/product-1.jpg",
+    "/products/terminal-connectors-1000/product-2.jpg",
+    "/products/terminal-connectors-1000/product-3.jpg",
+    "/products/terminal-connectors-1000/product-4.jpg",
+  ],
+  specifications: [
+    ["정격 전압", "12V"],
+    ["단자 유형", "Crimp Terminal"],
+    ["소재", "구리 (Copper)"],
+    ["표면 처리", "주석 도금"],
+    ["지원 규격", "AWG 22-16 ~ 2/0"],
+    ["인증", "CE · ROHS"],
+    ["모델 번호", "BN1.25-BN325"],
+    ["최소 주문", "1 bag (1,000개)"],
+  ],
+};
 
 function Icon({ children }) {
   return <span className="material-symbols-outlined" aria-hidden="true">{children}</span>;
@@ -92,8 +121,8 @@ export function BuyerShopsPage() {
       <section className="buyer-directory-section">
         <h2>인기 쇼핑몰</h2>
         <div className="buyer-shop-grid">
-          {SHOPS.map(([name, country, description, badge]) => (
-            <article key={name}><span className="buyer-shop-country">{country}</span><div className="buyer-shop-logo">{name.slice(0, 1)}</div><h3>{name}</h3><p>{description}</p><footer><span>{badge}</span><button type="button">쇼핑하기 →</button></footer></article>
+          {SHOPS.map(([name, country, description, badge, url]) => (
+            <article key={name}><span className="buyer-shop-country">{country}</span><div className="buyer-shop-logo">{name.slice(0, 1)}</div><h3>{name}</h3><p>{description}</p><footer><span>{badge}</span><a href={url} target="_blank" rel="noreferrer" aria-label={`${name} 공식 쇼핑몰 새 탭에서 열기`}>쇼핑하기 →</a></footer></article>
           ))}
         </div>
       </section>
@@ -111,10 +140,58 @@ export function BuyerAiPage() {
   return (
     <Layout topbarTitle="AI 추천" title="나를 위한 스마트 소싱" description="구매 패턴과 통관 데이터를 바탕으로 비용 효율이 높은 상품을 추천합니다.">
       <section className="buyer-ai-spotlight">
-        <img src={PRODUCT_IMAGES.industrial} alt="고정밀 산업용 커넥터 세트" />
-        <div><span>BEST MATCH 98%</span><h2>고정밀 산업용 커넥터 세트</h2><p>과거 구매 내역 대비 단가 15% 절감 예상. 현재 재고와 도착센터까지 함께 분석했습니다.</p><dl><div><dt>상품가</dt><dd>$450.00</dd></div><div><dt>예상 배송비</dt><dd>$45.00</dd></div><div><dt>예상 관부가세</dt><dd>$54.45</dd></div><div><dt>AI 예측 총비용</dt><dd>$549.45</dd></div></dl><button type="button" onClick={() => navigate("/buyer/estimate?product=고정밀 산업용 커넥터 세트")}>상세 보기 및 구매</button></div>
+        <img src={FEATURED_AI_PRODUCT.images[0]} alt={FEATURED_AI_PRODUCT.name} />
+        <div><span>BEST MATCH 98%</span><h2>{FEATURED_AI_PRODUCT.name}</h2><p>{FEATURED_AI_PRODUCT.summary}</p><dl><div><dt>판매처</dt><dd>Alibaba</dd></div><div><dt>상품 표시 가격</dt><dd>{FEATURED_AI_PRODUCT.price}</dd></div><div><dt>최소 주문수량</dt><dd>1 bag</dd></div><div><dt>배송비</dt><dd>판매자 문의</dd></div></dl><button type="button" onClick={() => navigate(`/buyer/recommendations/${FEATURED_AI_PRODUCT.id}`)}>상세 보기 및 구매</button></div>
       </section>
       <section className="buyer-directory-section"><h2>오늘의 AI 추천</h2><div className="buyer-ai-grid">{products.map(([name, category, price]) => <article key={name}><span><Icon>auto_awesome</Icon>{category}</span><h3>{name}</h3><p>상품가와 배송비, 관세를 반영한 예상 최종금액</p><strong>{price}</strong><button type="button" onClick={() => navigate(`/buyer/estimate?product=${encodeURIComponent(name)}`)}>분석하기</button></article>)}</div></section>
+    </Layout>
+  );
+}
+
+export function BuyerProductDetailPage() {
+  const navigate = useNavigate();
+  const { productId } = useParams();
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  if (productId !== FEATURED_AI_PRODUCT.id) {
+    return (
+      <Layout topbarTitle="AI 추천 상품" title="상품을 찾을 수 없습니다" description="추천 상품 목록에서 다시 선택해 주세요.">
+        <div className="empty-state"><strong>추천 상품 정보가 없습니다.</strong><button className="primary-action" type="button" onClick={() => navigate("/buyer/recommendations")}>AI 추천으로 돌아가기</button></div>
+      </Layout>
+    );
+  }
+
+  const product = FEATURED_AI_PRODUCT;
+  return (
+    <Layout topbarTitle="AI 추천 상품 상세" title="추천 상품 상세" description="실제 판매 페이지의 상품 정보와 구매 조건을 확인하세요.">
+      <nav className="buyer-product-breadcrumb" aria-label="현재 위치">
+        <button type="button" onClick={() => navigate("/buyer/recommendations")}>AI 추천</button><span>›</span><strong>{product.name}</strong>
+      </nav>
+      <section className="buyer-product-detail">
+        <div className="buyer-product-gallery">
+          <div className="buyer-product-main-image"><img src={product.images[selectedImage]} alt={`${product.name} 상품 이미지 ${selectedImage + 1}`} /></div>
+          <div className="buyer-product-thumbnails">
+            {product.images.map((image, index) => <button type="button" className={index === selectedImage ? "active" : ""} key={image} onClick={() => setSelectedImage(index)} aria-label={`상품 이미지 ${index + 1} 보기`}><img src={image} alt="" /></button>)}
+          </div>
+        </div>
+        <article className="buyer-product-info">
+          <span className="buyer-source-badge">Alibaba 실제 판매 상품</span>
+          <h2>{product.name}</h2>
+          <p className="buyer-product-original-name">{product.originalName}</p>
+          <p>{product.summary}</p>
+          <div className="buyer-product-price"><small>상품 표시 가격</small><strong>{product.price}</strong><span>판매 페이지에서 최종 가격 확인</span></div>
+          <dl><div><dt>판매자</dt><dd>{product.seller}</dd></div><div><dt>출발지</dt><dd>{product.origin}</dd></div><div><dt>샘플 가격</dt><dd>{product.samplePrice}</dd></div><div><dt>예상 리드타임</dt><dd>1~100 bag 기준 10일</dd></div></dl>
+          <div className="buyer-product-actions">
+            <a className="buyer-buy-button" href={product.sourceUrl} target="_blank" rel="noreferrer"><Icon>shopping_cart</Icon>구매하기</a>
+            <button type="button" onClick={() => navigate(`/buyer/estimate?url=${encodeURIComponent(product.sourceUrl)}`)}><Icon>calculate</Icon>MOHE 비용 분석</button>
+          </div>
+          <small className="buyer-external-notice">구매하기를 누르면 Alibaba 판매 페이지가 새 탭에서 열립니다. 가격과 배송비는 판매 페이지에서 다시 확인해 주세요.</small>
+        </article>
+      </section>
+      <section className="buyer-product-description">
+        <div><span className="buyer-panel-label">PRODUCT DETAIL</span><h2>상품 상세정보</h2><p>구리 소재와 주석 도금으로 제작된 압착 단자로 저전압 배선 연결에 사용합니다. 여러 AWG 규격을 지원하며 CE·ROHS 인증 정보가 판매 페이지에 표시되어 있습니다.</p><ul><li>1 bag당 1,000개 포장</li><li>간편한 압착 방식으로 배선 연결</li><li>전기 가열 및 저전압 응용 분야용</li><li>개별 포장 크기 25 × 25 × 15cm, 총중량 약 0.65kg</li></ul></div>
+        <div className="buyer-product-specs"><h2>주요 사양</h2>{product.specifications.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
+      </section>
     </Layout>
   );
 }

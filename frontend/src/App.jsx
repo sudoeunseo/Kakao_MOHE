@@ -13,6 +13,7 @@ import {
   BuyerCustomsPage,
   BuyerForwardingPage,
   BuyerPaymentsPage,
+  BuyerProductDetailPage,
   BuyerProductsPage,
   BuyerProfilePage,
   BuyerShopsPage,
@@ -84,6 +85,7 @@ function App() {
         <Route path="/buyer/products" element={<RoleRoute role="buyer"><BuyerProductsPage /></RoleRoute>} />
         <Route path="/buyer/shops" element={<RoleRoute role="buyer"><BuyerShopsPage /></RoleRoute>} />
         <Route path="/buyer/recommendations" element={<RoleRoute role="buyer"><BuyerAiPage /></RoleRoute>} />
+        <Route path="/buyer/recommendations/:productId" element={<RoleRoute role="buyer"><BuyerProductDetailPage /></RoleRoute>} />
         <Route path="/buyer/customs" element={<RoleRoute role="buyer"><BuyerCustomsPage /></RoleRoute>} />
         <Route path="/buyer/forwarding" element={<RoleRoute role="buyer"><BuyerForwardingPage /></RoleRoute>} />
         <Route path="/buyer/payments" element={<RoleRoute role="buyer"><BuyerPaymentsPage /></RoleRoute>} />
