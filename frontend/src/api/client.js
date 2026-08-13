@@ -1,5 +1,7 @@
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+  configuredApiUrl ||
+  (window.location.hostname === "localhost" ? "http://localhost:4000" : window.location.origin);
 
 export function getApiUrl(path) {
   return `${API_BASE_URL}${path}`;

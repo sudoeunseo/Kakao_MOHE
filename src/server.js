@@ -2,6 +2,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const estimateRoutes = require('./routes/estimate');
@@ -22,6 +24,21 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/kakaopay', kakaopayRoutes);
 app.use('/api/customs-delay', customsDelayRoutes);
 app.use('/api/business-trend', businessTrendRoutes);
+
+// Render에서는 React 빌드 결과도 같은 Express 서버에서 제공한다.
+// 로컬 개발은 기존처럼 Vite(5173) + Express(4000)를 각각 실행할 수 있다.
+const frontendDist = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+
+  // React Router의 /buyer/*, /business/* 같은 직접 접근도 index.html로 연결한다.
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && req.accepts('html')) {
+      return res.sendFile(path.join(frontendDist, 'index.html'));
+    }
+    return next();
+  });
+}
 
 // 존재하지 않는 라우트
 app.use((req, res) => {
