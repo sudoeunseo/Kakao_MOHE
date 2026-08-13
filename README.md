@@ -19,7 +19,10 @@ npm run dev
 | POST | `/api/auth/signup` | 회원가입 `{email, password, name, role}` (role: buyer\|business) |
 | POST | `/api/auth/login` | 로그인 `{email, password}` → `{id, email, name, role}` 반환. **프론트는 이 role로 화면 분기** |
 | POST | `/api/estimate` | AI 비용예측 `{productName, priceAmount, priceCurrency, originCountry, shippingMode}` → 예측 JSON |
-| POST | `/api/orders` | 주문 생성 (결제 연동 없이 즉시 'paid' 처리) |
+| POST | `/api/kakaopay/ready` | 카카오페이 결제 준비 → 결제창 URL 반환 |
+| POST | `/api/kakaopay/approve` | 카카오페이 결제 승인 → 이 시점에 주문이 DB에 저장됨 |
+| POST | `/api/customs-delay` | AI 통관지연예측 `{productName, category, originCountry, isDutyFreeLikely}` → 예상 통관일/지연확률/리스크 |
+| GET | `/api/business-trend` | AI 수요·수익예측 (입력 없음, 서버가 기존 주문 데이터를 집계해서 예측) — 기업 대시보드용 |
 | GET | `/api/orders?userId=1` | 특정 유저 주문 목록 (마이페이지용) |
 | GET | `/api/orders/all` | 전체 주문 목록 (기업/비즈니스 주문관리 화면용) |
 
