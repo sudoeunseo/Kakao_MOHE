@@ -10,3 +10,7 @@ services:
         sync: false
       - key: GEMINI_MODEL
         value: gemini-flash-latest
+      - key: KAKAOPAY_CID
+        value: TC0ONETIME
+      - key: KAKAOPAY_SECRET_KEY
+        sync: false

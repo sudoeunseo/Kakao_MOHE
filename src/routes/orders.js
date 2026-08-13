@@ -78,4 +78,39 @@ router.get('/all', (req, res) => {
   return res.json(orders);
 });
 
+// 주문 하나만 조회 — 결제 완료 화면 등 단건 조회가 필요한 곳에서 사용
+router.get('/:id', (req, res) => {
+  const { id } = req.params;
+
+  const order = db.prepare(`SELECT * FROM orders WHERE id = ?`).get(id);
+  if (!order) {
+    return res.status(404).json({ error: '해당 주문을 찾을 수 없습니다.' });
+  }
+
+  order.ai_estimate = order.ai_estimate ? JSON.parse(order.ai_estimate) : null;
+  return res.json(order);
+});
+
+const ORDER_STATUSES = ['pending', 'paid', 'shipping', 'customs', 'delivered'];
+
+// 주문 상태 변경 — 기업(비즈니스) 주문관리 화면에서 "배송중/통관중/배송완료"로 전환할 때 사용
+router.patch('/:id', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status || !ORDER_STATUSES.includes(status)) {
+    return res.status(400).json({ error: `status는 ${ORDER_STATUSES.join(' | ')} 중 하나여야 합니다.` });
+  }
+
+  const result = db.prepare(`UPDATE orders SET status = ? WHERE id = ?`).run(status, id);
+  if (result.changes === 0) {
+    return res.status(404).json({ error: '해당 주문을 찾을 수 없습니다.' });
+  }
+
+  const order = db.prepare(`SELECT * FROM orders WHERE id = ?`).get(id);
+  order.ai_estimate = order.ai_estimate ? JSON.parse(order.ai_estimate) : null;
+
+  return res.json(order);
+});
+
 module.exports = router;

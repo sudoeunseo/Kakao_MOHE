@@ -25,6 +25,8 @@ npm run dev
 | GET | `/api/business-trend` | AI 수요·수익예측 (입력 없음, 서버가 기존 주문 데이터를 집계해서 예측) — 기업 대시보드용 |
 | GET | `/api/orders?userId=1` | 특정 유저 주문 목록 (마이페이지용) |
 | GET | `/api/orders/all` | 전체 주문 목록 (기업/비즈니스 주문관리 화면용) |
+| GET | `/api/orders/:id` | 주문 단건 조회 |
+| PATCH | `/api/orders/:id` | 주문 상태 변경 `{status}` (status: pending\|paid\|shipping\|customs\|delivered) — 기업 주문관리 화면용 |
 
 ## 설계 원칙 (시간 없을 때 왜 이렇게 짰는지)
 
