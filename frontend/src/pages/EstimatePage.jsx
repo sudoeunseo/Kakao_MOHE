@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import EstimatingResult from "../components/EstimatingResult";
 import Layout from "../components/Layout";
@@ -37,15 +37,16 @@ const CONFIDENCE_LABEL = {
 
 function EstimatePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = JSON.parse(localStorage.getItem("moheUser") || "{}");
-  const [form, setForm] = useState({
-    productName: "",
-    productUrl: "",
+  const [form, setForm] = useState(() => ({
+    productName: searchParams.get("product") || "",
+    productUrl: searchParams.get("url") || "",
     priceAmount: "",
     priceCurrency: "USD",
     originCountry: "",
     shippingMode: "forwarding",
-  });
+  }));
   const [estimate, setEstimate] = useState(null);
   const [productAnalysis, setProductAnalysis] = useState(null);
   const [error, setError] = useState("");
@@ -198,16 +199,17 @@ function EstimatePage() {
 
   return (
     <Layout
-      title="AI 해외구매 비용 분석"
-      description={`${user.name}님, 구매 전에 숨은 비용과 통관 위험을 먼저 확인하세요.`}
+      topbarTitle="상품 분석·관세 계산"
+      title="관세·최종비용 계산하기"
+      description={`${user.name}님, 상품 링크를 입력하면 AI가 상품 정보와 통관 비용을 한 번에 분석합니다.`}
     >
       <div className="estimate-layout">
         <section className="content-card form-card">
           <div className="section-title">
-            <span>STEP 1</span>
+            <span>AI ANALYSIS</span>
             <div>
               <h2>상품 정보 입력</h2>
-              <p>상품 정보를 바탕으로 AI가 품목과 최종비용을 분석합니다.</p>
+              <p>URL 자동 분석 결과를 확인한 뒤 예상 최종비용을 계산하세요.</p>
             </div>
             <button type="button" className="sample-button" onClick={loadSampleProduct}>
               운동화 예시 불러오기

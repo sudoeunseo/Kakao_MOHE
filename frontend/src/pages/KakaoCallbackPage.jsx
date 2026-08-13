@@ -21,7 +21,7 @@ function KakaoCallbackPage() {
     api(`/api/auth/kakao/session?token=${encodeURIComponent(token)}`)
       .then((user) => {
         localStorage.setItem("moheUser", JSON.stringify(user));
-        navigate("/buyer/estimate", { replace: true });
+        navigate("/buyer/home", { replace: true });
       })
       .catch((requestError) => setError(requestError.message));
   }, [navigate, searchParams]);

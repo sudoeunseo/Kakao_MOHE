@@ -7,6 +7,7 @@ import {
 
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import BuyerHomePage from "./pages/BuyerHomePage";
 import EstimatePage from "./pages/EstimatePage";
 import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
@@ -38,7 +39,7 @@ function RoleRoute({ role, children }) {
     const destination =
       user.role === "business"
         ? "/business/dashboard"
-        : "/buyer/estimate";
+        : "/buyer/home";
 
     return <Navigate to={destination} replace />;
   }
@@ -54,6 +55,15 @@ function App() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
+
+        <Route
+          path="/buyer/home"
+          element={
+            <RoleRoute role="buyer">
+              <BuyerHomePage />
+            </RoleRoute>
+          }
+        />
 
         <Route
           path="/buyer/estimate"

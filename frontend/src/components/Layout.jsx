@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import Icon from "./Icon";
+import "../pages/BuyerPortal.css";
 
 const BUSINESS_NAV = [
   { to: "/business/dashboard", label: "홈", icon: "dashboard" },
@@ -12,7 +13,13 @@ const BUSINESS_NAV = [
   { label: "설정/관리", icon: "settings", soon: true },
 ];
 
-function Layout({ children, title, description, actions }) {
+const BUYER_MENU = [
+  ["/buyer/home", "⌂", "홈"],
+  ["/buyer/estimate", "⌕", "상품 분석·관세 계산"],
+  ["/buyer/orders", "▤", "내 주문·배송 조회"],
+];
+
+function Layout({ children, title, description, actions, topbarTitle }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("moheUser") || "{}");
   const isBusiness = user.role === "business";
@@ -24,13 +31,15 @@ function Layout({ children, title, description, actions }) {
   }
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
+    <div className={`app-shell ${isBusiness ? "business-shell" : "buyer-shell"}`}>
+      <aside className={`sidebar ${isBusiness ? "business-sidebar" : "buyer-sidebar"}`}>
         <div className="app-brand">
           <span className="app-brand-mark">
             <img src={logo} alt="Kakao MOHE" />
           </span>
-          {isBusiness && <span className="seller-tag">SELLER ACCOUNT</span>}
+          <span className={isBusiness ? "seller-tag" : "buyer-brand-tag"}>
+            {isBusiness ? "SELLER ACCOUNT" : "Buyer Portal"}
+          </span>
         </div>
 
         <nav className="app-navigation" aria-label="주요 메뉴">
@@ -50,10 +59,12 @@ function Layout({ children, title, description, actions }) {
               ),
             )
           ) : (
-            <>
-              <NavLink to="/buyer/estimate">AI 상품 분석</NavLink>
-              <NavLink to="/buyer/orders">내 주문</NavLink>
-            </>
+            BUYER_MENU.map(([to, icon, label]) => (
+              <NavLink key={to} to={to}>
+                <span className="buyer-nav-icon" aria-hidden="true">{icon}</span>
+                <span>{label}</span>
+              </NavLink>
+            ))
           )}
         </nav>
 
@@ -72,6 +83,16 @@ function Layout({ children, title, description, actions }) {
       </aside>
 
       <div className="app-main">
+        {!isBusiness && (
+          <header className="buyer-topbar">
+            <strong>{topbarTitle || title}</strong>
+            <div className="buyer-utilities" aria-label="구매자 빠른 메뉴">
+              <span title="배송 위치">⌖</span>
+              <span title="알림">♢</span>
+              <span className="buyer-utility-avatar">{user.name?.slice(0, 1) || "M"}</span>
+            </div>
+          </header>
+        )}
         <header className="mobile-header">
           <div className="app-brand compact">
             <span className="app-brand-mark">
@@ -104,7 +125,7 @@ function Layout({ children, title, description, actions }) {
           <header className="page-heading">
             <div>
               <span className="page-eyebrow">
-                {isBusiness ? "BUSINESS CONTROL TOWER" : "SMART GLOBAL PURCHASE"}
+                {isBusiness ? "BUSINESS CONTROL TOWER" : "KAKAO MOHE · BUYER PORTAL"}
               </span>
               <h1>{title}</h1>
               {description && <p>{description}</p>}
