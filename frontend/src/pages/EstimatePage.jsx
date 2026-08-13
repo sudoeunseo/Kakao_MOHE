@@ -169,7 +169,7 @@ function EstimatePage() {
                 placeholder="https://"
               />
               <small className="field-help">
-                현재 URL의 상품명이나 가격을 자동으로 가져오지는 않습니다. 아래 정보를 직접 입력해 주세요.
+                아래 정보를 직접 입력해 주세요.
               </small>
             </label>
 
