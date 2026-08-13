@@ -52,10 +52,13 @@ button { border: 0; }
 .section-title > span { padding: 6px 8px; border-radius: 6px; color: var(--navy); background: var(--yellow); font-size: 10px; font-weight: 900; }
 .section-title h2 { margin: 0 0 5px; color: var(--navy); font-size: 21px; }
 .section-title p { margin: 0; color: var(--muted); font-size: 13px; }
+.sample-button { margin-left: auto; padding: 8px 11px; flex: 0 0 auto; border-radius: 8px; color: #4e5a70; background: #eef1f6; font-size: 10px; font-weight: 800; cursor: pointer; }
+.sample-button:hover { color: var(--navy); background: #e1e6ee; }
 .estimate-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 19px; }
 .field { display: grid; gap: 8px; }
 .field > span, .shipping-field legend { color: #323b4e; font-size: 13px; font-weight: 800; }
 .field small { color: #9aa2b1; font-weight: 500; }
+.field .field-help { margin-top: -2px; color: #8b94a4; font-size: 10px; line-height: 1.45; }
 .field input, .field select { width: 100%; height: 50px; padding: 0 14px; border: 1px solid #dce1e9; border-radius: 11px; outline: 0; color: var(--navy); background: white; }
 .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(61,109,242,.1); }
 .full-field { grid-column: 1 / -1; }
@@ -244,6 +247,8 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
   .page-actions { width: 100%; }
   .page-actions button { width: 100%; }
   .estimate-form { grid-template-columns: 1fr; }
+  .section-title { flex-wrap: wrap; }
+  .sample-button { width: 100%; margin-left: 0; }
   .full-field, .shipping-field { grid-column: auto; }
   .shipping-field { grid-template-columns: 1fr; }
   .result-hero { align-items: flex-start; }

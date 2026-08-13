@@ -8,9 +8,9 @@ function EstimatePage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("moheUser") || "{}");
   const [form, setForm] = useState({
-    productName: "Nike Air Max 90 운동화",
-    productUrl: "https://www.example.com/products/air-max-90",
-    priceAmount: "180",
+    productName: "",
+    productUrl: "",
+    priceAmount: "",
     priceCurrency: "USD",
     originCountry: "US",
     shippingMode: "forwarding",
@@ -24,6 +24,19 @@ function EstimatePage() {
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
+    setEstimate(null);
+    setError("");
+  }
+
+  function loadSampleProduct() {
+    setForm({
+      productName: "Nike Air Max 90 운동화",
+      productUrl: "https://www.example.com/products/air-max-90",
+      priceAmount: "180",
+      priceCurrency: "USD",
+      originCountry: "US",
+      shippingMode: "forwarding",
+    });
     setEstimate(null);
     setError("");
   }
@@ -129,6 +142,9 @@ function EstimatePage() {
               <h2>상품 정보 입력</h2>
               <p>상품 정보를 바탕으로 AI가 품목과 최종비용을 분석합니다.</p>
             </div>
+            <button type="button" className="sample-button" onClick={loadSampleProduct}>
+              운동화 예시 불러오기
+            </button>
           </div>
 
           <form className="estimate-form" onSubmit={handleEstimate}>
@@ -144,7 +160,7 @@ function EstimatePage() {
             </label>
 
             <label className="field full-field">
-              <span>상품 URL <small>선택</small></span>
+              <span>상품 URL <small>선택 · 주문 참고용</small></span>
               <input
                 name="productUrl"
                 type="url"
@@ -152,10 +168,13 @@ function EstimatePage() {
                 onChange={handleChange}
                 placeholder="https://"
               />
+              <small className="field-help">
+                현재 URL의 상품명이나 가격을 자동으로 가져오지는 않습니다. 아래 정보를 직접 입력해 주세요.
+              </small>
             </label>
 
             <label className="field">
-              <span>상품 가격</span>
+              <span>상품 가격 <small>직접 입력</small></span>
               <input
                 name="priceAmount"
                 type="number"
