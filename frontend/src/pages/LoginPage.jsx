@@ -44,7 +44,7 @@ function LoginPage() {
     if (user.role === "business") {
       navigate("/business/dashboard", { replace: true });
     } else {
-      navigate("/buyer/estimate", { replace: true });
+      navigate("/buyer/home", { replace: true });
     }
   }
 

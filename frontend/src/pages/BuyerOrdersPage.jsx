@@ -33,6 +33,7 @@ function BuyerOrdersPage() {
 
   return (
     <Layout
+      topbarTitle="내 주문·배송 조회"
       title="내 해외주문"
       description="여러 해외 쇼핑몰의 주문과 통관 진행상태를 한곳에서 확인하세요."
       actions={
