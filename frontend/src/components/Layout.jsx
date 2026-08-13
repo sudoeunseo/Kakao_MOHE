@@ -1,13 +1,15 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import Icon from "./Icon";
 
 const BUSINESS_NAV = [
-  { to: "/business/dashboard", label: "홈·대시보드" },
-  { to: "/business/orders", label: "주문 관리" },
-  { label: "배송대행지 관리", soon: true },
-  { to: "/business/revenue", label: "통계·분석" },
-  { label: "설정·관리", soon: true },
-  { label: "구매 문의", soon: true },
+  { to: "/business/dashboard", label: "홈", icon: "dashboard" },
+  { to: "/business/orders", label: "주문 관리", icon: "package_2" },
+  { to: "/business/logistics", label: "물류 관리", icon: "local_shipping" },
+  { label: "배송대행지 관리", icon: "home_work", soon: true },
+  { to: "/business/revenue", label: "분석", icon: "analytics" },
+  { to: "/business/inquiries", label: "구매 문의", icon: "support_agent" },
+  { label: "설정/관리", icon: "settings", soon: true },
 ];
 
 function Layout({ children, title, description, actions }) {
@@ -36,11 +38,13 @@ function Layout({ children, title, description, actions }) {
             BUSINESS_NAV.map((item) =>
               item.soon ? (
                 <span key={item.label} className="nav-soon">
+                  <Icon name={item.icon} />
                   {item.label}
                   <small>준비중</small>
                 </span>
               ) : (
                 <NavLink key={item.to} to={item.to}>
+                  <Icon name={item.icon} />
                   {item.label}
                 </NavLink>
               ),
@@ -78,6 +82,23 @@ function Layout({ children, title, description, actions }) {
             로그아웃
           </button>
         </header>
+
+        {isBusiness && (
+          <header className="top-bar">
+            <div className="top-bar-search">
+              <Icon name="search" />
+              <input type="text" placeholder="주문, 재고 검색..." readOnly />
+            </div>
+            <div className="top-bar-actions">
+              <div className="lang-toggle">
+                <button type="button" className="active">KO</button>
+                <button type="button">EN</button>
+              </div>
+              <button type="button" className="icon-button" aria-hidden="true"><Icon name="notifications" /></button>
+              <button type="button" className="icon-button" aria-hidden="true"><Icon name="help" /></button>
+            </div>
+          </header>
+        )}
 
         <main className="page-content">
           <header className="page-heading">

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { api, formatDate, formatWon } from "../api/client";
 import Layout from "../components/Layout";
+import Icon from "../components/Icon";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const STATUS_LABEL = {
@@ -9,6 +10,14 @@ const STATUS_LABEL = {
   shipping: "국제운송중",
   customs: "통관중",
   delivered: "배송완료",
+};
+
+const STATUS_ICON = {
+  pending: "shopping_cart",
+  paid: "inventory_2",
+  shipping: "flight_takeoff",
+  customs: "policy",
+  delivered: "check_circle",
 };
 
 const STATUS_OPTIONS = Object.entries(STATUS_LABEL);
@@ -71,6 +80,13 @@ function BusinessOrdersPage() {
   }
 
   const estimate = selectedOrder?.ai_estimate;
+  const statusCounts = useMemo(
+    () => STATUS_OPTIONS.reduce((acc, [key]) => {
+      acc[key] = orders.filter((order) => order.status === key).length;
+      return acc;
+    }, {}),
+    [orders],
+  );
 
   return (
     <Layout
@@ -97,6 +113,25 @@ function BusinessOrdersPage() {
           <p>구매자 계정에서 주문을 생성하면 이곳에 즉시 표시됩니다.</p>
         </div>
       ) : (
+        <>
+        <section className="content-card pipeline-card">
+          <div className="card-heading-row">
+            <div><span>ORDER FLOW</span><h2>주문·배송 현황</h2></div>
+          </div>
+          <div className="pipeline-row">
+            {STATUS_OPTIONS.map(([key, label], index) => (
+              <Fragment key={key}>
+                {index > 0 && <span className="pipeline-arrow"><Icon name="chevron_right" /></span>}
+                <div className="pipeline-node">
+                  <span className="pipeline-icon"><Icon name={STATUS_ICON[key]} /></span>
+                  <strong>{label}</strong>
+                  <small>{statusCounts[key] || 0}건</small>
+                </div>
+              </Fragment>
+            ))}
+          </div>
+        </section>
+
         <div className="dashboard-grid">
           <section className="content-card orders-table-card">
             <div className="card-heading-row">
@@ -193,6 +228,7 @@ function BusinessOrdersPage() {
             )}
           </aside>
         </div>
+        </>
       )}
     </Layout>
   );

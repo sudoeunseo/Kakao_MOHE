@@ -12,6 +12,8 @@ import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
 import BusinessOrdersPage from "./pages/BusinessOrdersPage";
 import BusinessRevenuePage from "./pages/BusinessRevenuePage";
+import LogisticsPreviewPage from "./pages/LogisticsPreviewPage";
+import InquiriesPreviewPage from "./pages/InquiriesPreviewPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import KakaoCallbackPage from "./pages/KakaoCallbackPage";
@@ -116,6 +118,24 @@ function App() {
           element={
             <RoleRoute role="business">
               <BusinessRevenuePage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/business/logistics"
+          element={
+            <RoleRoute role="business">
+              <LogisticsPreviewPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/business/inquiries"
+          element={
+            <RoleRoute role="business">
+              <InquiriesPreviewPage />
             </RoleRoute>
           }
         />
