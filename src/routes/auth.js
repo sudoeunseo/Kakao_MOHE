@@ -18,13 +18,21 @@ const pendingLoginSessions = new Map();
 
 function kakaoConfig() {
   const port = process.env.PORT || 4000;
+  const renderUrl = (process.env.RENDER_EXTERNAL_URL || '').replace(/\/$/, '');
+  const frontendUrl = (
+    process.env.FRONTEND_URL ||
+    renderUrl ||
+    'http://localhost:5173'
+  ).replace(/\/$/, '');
+
   return {
     restApiKey: process.env.KAKAO_REST_API_KEY,
     clientSecret: process.env.KAKAO_CLIENT_SECRET,
     redirectUri:
       process.env.KAKAO_REDIRECT_URI ||
+      (renderUrl ? `${renderUrl}/api/auth/kakao/callback` : null) ||
       `http://localhost:${port}/api/auth/kakao/callback`,
-    frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, ''),
+    frontendUrl,
   };
 }
 
