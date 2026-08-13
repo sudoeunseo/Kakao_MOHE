@@ -21,34 +21,18 @@
 }
 
 .landing-nav-inner {
-  max-width: 1280px;
-  height: 64px;
+  width: 100%;
+  height: 86px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 40px);
+  padding: 0 clamp(24px, 3vw, 40px);
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 28px;
 }
 
 .landing-brand { cursor: pointer; flex: 0 0 auto; }
 .landing-brand img { display: block; height: 26px; width: auto; }
-
-.landing-nav-inner nav {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 28px;
-}
-
-.landing-nav-inner nav span {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.landing-nav-inner nav span.active { color: var(--navy); padding-bottom: 21px; border-bottom: 2px solid var(--navy); }
 
 .landing-nav-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; }
 .lang-toggle { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: #f2f4f6; }
@@ -57,30 +41,38 @@
 .icon-button { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 999px; color: var(--muted); background: transparent; cursor: pointer; }
 .icon-button:hover { color: var(--navy); background: #f2f4f6; }
 .icon-button .material-symbols-outlined { font-size: 20px; }
+.landing-login-button { min-height: 48px; padding: 0 22px; display: inline-flex; align-items: center; gap: 9px; border-radius: 13px; color: #191919; background: var(--yellow); box-shadow: 0 5px 12px rgba(23,33,58,.14); font-size: 14px; font-weight: 900; cursor: pointer; }
+.landing-login-button:hover { background: var(--yellow-hover); transform: translateY(-1px); }
+.landing-login-button .material-symbols-outlined { font-size: 22px; }
+.landing-alert { position: relative; }
+.landing-alert i { width: 8px; height: 8px; position: absolute; top: 5px; right: 4px; border: 2px solid white; border-radius: 50%; background: #ef4444; }
+.landing-profile-button { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--navy); background: #fff; box-shadow: 0 2px 7px rgba(23,33,58,.08); cursor: pointer; }
+.landing-profile-button::before { width: 31px; height: 31px; position: absolute; content: ""; border-radius: 50%; background: var(--yellow); }
+.landing-profile-button { position: relative; }
+.landing-profile-button .material-symbols-outlined { position: relative; z-index: 1; font-size: 24px; }
 
 .landing-hero {
   position: relative;
-  min-height: 500px;
+  min-height: min(810px, calc(100vh - 86px));
   display: flex;
   align-items: center;
   background-color: var(--navy-deep);
   background-size: cover;
-  background-position: center;
+  background-position: center 54%;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(8,21,46,0.92) 0%, rgba(8,21,46,0.45) 100%);
+  background: linear-gradient(90deg, rgba(8,21,46,.96) 0%, rgba(8,21,46,.82) 42%, rgba(8,21,46,.36) 100%);
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: 64px clamp(20px, 4vw, 40px);
+  padding: 78px clamp(38px, 4.2vw, 78px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -88,41 +80,51 @@
 }
 
 .hero-tag {
-  padding: 6px 12px;
-  border: 1px solid rgba(254,229,0,.3);
-  border-radius: 4px;
+  padding: 11px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(254,229,0,.7);
+  border-radius: 5px;
   color: var(--yellow);
   background: rgba(15,22,40,.5);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
+.hero-tag .material-symbols-outlined { font-size: 20px; }
 
 .hero-content h1 {
   margin: 0;
   color: white;
-  font-size: clamp(36px, 5vw, 60px);
+  font-size: clamp(48px, 5vw, 72px);
   line-height: 1.12;
-  letter-spacing: -1.5px;
+  letter-spacing: -2.6px;
   font-weight: 800;
 }
 .hero-content h1 .accent { color: var(--yellow); }
+.hero-content h1 .hero-syllable { color: var(--yellow); }
 
 .hero-content p {
-  max-width: 620px;
+  max-width: 730px;
   margin: 0;
   color: #cfd6e6;
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 17px;
+  line-height: 1.75;
 }
 
-.hero-actions { display: flex; gap: 12px; margin-top: 8px; }
-.hero-actions .primary-action { white-space: nowrap; }
+.hero-actions { display: flex; gap: 18px; margin-top: 18px; }
+.hero-actions .primary-action { min-height: 58px; padding: 0 30px; color: #191919; background: var(--yellow); box-shadow: 0 9px 22px rgba(0,0,0,.15); font-size: 15px; white-space: nowrap; }
+.hero-actions .primary-action:hover { background: var(--yellow-hover); }
 .hero-actions .primary-action .material-symbols-outlined { font-size: 16px; }
 .hero-outline-action {
-  min-height: 50px;
-  padding: 0 20px;
+  min-height: 58px;
+  padding: 0 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   color: white;
   background: transparent;
   border: 1px solid rgba(255,255,255,.6);
@@ -196,7 +198,8 @@
 }
 
 @media (max-width: 900px) {
-  .landing-nav-inner nav { display: none; }
+  .landing-login-button { padding: 0 14px; }
+  .landing-nav-actions > .icon-button { display: none; }
   .bento-grid { grid-template-columns: 1fr 1fr; }
   .image-card-content { width: 100%; }
 }
@@ -208,5 +211,15 @@
   .bento-card.wide { grid-column: span 1; }
   .hero-actions { flex-direction: column; width: 100%; }
   .hero-actions button { width: 100%; }
-  .lang-toggle { display: none; }
+  .landing-nav-inner { height: 70px; }
+  .landing-brand .mohe-brand-logo { gap: 7px; }
+  .landing-brand .mohe-brand-bubble { width: 30px; height: 23px; }
+  .landing-brand .mohe-brand-wordmark { font-size: 18px; }
+  .landing-profile-button { display: none; }
+  .landing-login-button { min-height: 42px; padding: 0 12px; font-size: 0; }
+  .landing-login-button .material-symbols-outlined { font-size: 21px; }
+  .landing-hero { min-height: calc(100vh - 70px); }
+  .hero-content { padding: 54px 24px; }
+  .hero-content h1 { font-size: 42px; }
+  .hero-content p { font-size: 14px; }
 }

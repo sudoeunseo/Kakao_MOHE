@@ -1,14 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
+import BrandLogo from "../components/BrandLogo";
+import useLanguage from "../context/useLanguage";
 import "./LandingPage.css";
 
 const HERO_IMAGE =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDzbIIBdle2zib_6FINaSKmLNoq6C086rSWO4Ih_x56HyUzoVIvX7Evd9EcKNZRXbh00lmFuSeo_eoSesO9cb8t6S8JLyyZNn5ad3eQQHkHVDjhZU3FA49nKXMoY9vsjJUn7UNUhwwm8jdHWfyorWDwIbLo1C_qKjxrLKg45ymicsqiEadsrEVF1_ytLMK6g7lgnB7KZnjZ0Nlt9SDw20FBSCan_by61l7SdSPe7lodtEkJe93Rdmv-Sg";
+  "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=86&w=2000";
 
 const DASHBOARD_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBPwVAn05hHQns8DXj7M3__wACdZ1VOAEkN06XwNwEDDc3W686habpPMt2j5oK3xo6kcundHsHUBXRl_thXxoVd8VYwWE9XtTY_5X7FmUzi6JgHxmQSIFD3QRgad7GQRkE6Csda-0eXVRGYAbsza_cxIETaGr-SxEhcy0HGZSNi2BPmhDpeYAl13xRVmRPC-kxuyQbVNszVDDgGyLGrdIw2vbQLoNn0p7u0Qseicfg6o2ycSome9JEPvw";
-
-const NAV_LINKS = ["홈/대시보드", "주문관리", "배송대행지 관리", "통계/분석"];
 
 const PROCESS_STEPS = [
   { icon: "inventory_2", title: "상품 등록/연동", desc: "다양한 채널의 상품 정보를 한 곳에서 관리" },
@@ -25,29 +24,26 @@ function Icon({ name }) {
 
 function LandingPage() {
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <div className="landing-page">
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <div className="landing-brand" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            <img src={logo} alt="Kakao MOHE" />
+            <BrandLogo />
           </div>
-          <nav aria-label="주요 메뉴 미리보기">
-            {NAV_LINKS.map((label, index) => (
-              <span key={label} className={index === 0 ? "active" : ""}>{label}</span>
-            ))}
-          </nav>
           <div className="landing-nav-actions">
             <div className="lang-toggle">
-              <button type="button" className="active">KO</button>
-              <button type="button">EN</button>
+              <button type="button" className={language === "ko" ? "active" : ""} onClick={() => setLanguage("ko")}>KO</button>
+              <button type="button" className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
             </div>
-            <button type="button" className="icon-button" aria-hidden="true"><Icon name="notifications" /></button>
-            <button type="button" className="icon-button" aria-hidden="true"><Icon name="help" /></button>
-            <button type="button" className="icon-button" onClick={() => navigate("/login")} title="로그인">
-              <Icon name="person" />
+            <button type="button" className="landing-login-button" onClick={() => navigate("/login")}>
+              <Icon name="login" /> {t("로그인 / 시작하기", "Log in / Get started")}
             </button>
+            <button type="button" className="icon-button landing-alert" aria-label={t("알림", "Notifications")}><Icon name="notifications" /><i /></button>
+            <button type="button" className="icon-button" aria-label={t("관부가세 계산기", "Duty calculator")}><Icon name="calculate" /></button>
+            <button type="button" className="landing-profile-button" onClick={() => navigate("/login")} aria-label={t("프로필", "Profile")}><Icon name="person" /></button>
           </div>
         </div>
       </header>
@@ -56,20 +52,21 @@ function LandingPage() {
         <section className="landing-hero" style={{ backgroundImage: `url(${HERO_IMAGE})` }}>
           <div className="hero-overlay" />
           <div className="hero-content">
-            <span className="hero-tag">SELLER PORTAL</span>
+            <span className="hero-tag"><Icon name="public" /> KAKAO MOHE | {t("모두의 해외직구 PLATFORM", "GLOBAL SHOPPING PLATFORM")}</span>
             <h1>
-              글로벌 물류를<br />
-              <span className="accent">하나의 흐름으로</span>
+              {language === "ko" ? (
+                <><span className="hero-syllable">모</span>두의 <span className="hero-syllable">해</span>외직구,</>
+              ) : "Global shopping for everyone,"}<br />
+              <span className="accent">Kakao MOHE</span>
             </h1>
             <p>
-              복잡한 크로스보더 이커머스 운영을 단순화합니다. Kakao MOHE는 주문부터 배송, 정산까지 모든 과정을
-              투명하고 효율적으로 관리할 수 있는 통합 솔루션을 제공합니다.
+              {t("'MOHE(모두의 해외직구)'는 복잡한 크로스보더 커머스와 직구를 누구나 쉽고 안전하게 이용할 수 있는 원스톱 플랫폼입니다. 해외 상품 탐색부터 AI 최적 소싱, 관부가세 간편결제 및 실시간 수입통관까지 모두를 위한 직구 경험을 제공합니다.", "MOHE is an all-in-one platform that makes cross-border commerce simple and safe for everyone—from product discovery and AI-powered sourcing to easy duty payments and real-time customs tracking.")}
             </p>
             <div className="hero-actions">
               <button type="button" className="primary-action" onClick={() => navigate("/login")}>
-                시작하기 <Icon name="arrow_forward" />
+                {t("시작하기 / 로그인", "Get started / Log in")} <Icon name="arrow_forward" />
               </button>
-              <button type="button" className="hero-outline-action">도입 문의</button>
+              <button type="button" className="hero-outline-action" onClick={() => navigate("/buyer/shops")}><Icon name="storefront" /> {t("해외 쇼핑몰 둘러보기", "Explore overseas shops")}</button>
             </div>
           </div>
         </section>

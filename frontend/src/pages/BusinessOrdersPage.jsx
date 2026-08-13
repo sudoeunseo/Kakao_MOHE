@@ -4,13 +4,14 @@ import Layout from "../components/Layout";
 import Icon from "../components/Icon";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { getOrderDisplay } from "../utils/orderDisplay";
+import useLanguage from "../context/useLanguage";
 
 const STATUS_LABEL = {
-  pending: "소싱 접수",
-  paid: "배송대행지 검수",
-  shipping: "국제운송중",
-  customs: "통관중",
-  delivered: "셀러 입고완료",
+  pending: { ko: "소싱 접수", en: "Sourcing" },
+  paid: { ko: "배송대행지 검수", en: "Hub Inspection" },
+  shipping: { ko: "국제운송중", en: "International Transit" },
+  customs: { ko: "통관중", en: "Customs" },
+  delivered: { ko: "셀러 입고완료", en: "Seller Intake Complete" },
 };
 
 const STATUS_ICON = {
@@ -24,6 +25,7 @@ const STATUS_ICON = {
 const STATUS_OPTIONS = Object.entries(STATUS_LABEL);
 
 function BusinessOrdersPage() {
+  const { language, t } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -91,33 +93,33 @@ function BusinessOrdersPage() {
 
   return (
     <Layout
-      title="주문 관리"
-      description="판매용 해외 상품을 카카오 MOHE 배송대행지로 소싱하고 구매·검수·국제운송·통관·입고 상태를 관리합니다."
+      title={t("주문 관리", "Order Management")}
+      description={t("판매용 해외 상품을 카카오 MOHE 배송대행지로 소싱하고 구매·검수·국제운송·통관·입고 상태를 관리합니다.", "Source overseas products through Kakao MOHE hubs and manage purchasing, inspection, international shipping, customs, and intake.")}
       actions={
         <button className="secondary-action compact-action" onClick={loadOrders}>
-          데이터 새로고침
+          {t("데이터 새로고침", "Refresh data")}
         </button>
       }
     >
       {loading ? (
-        <LoadingSpinner label="주문 데이터를 불러오고 있습니다" />
+        <LoadingSpinner label={t("주문 데이터를 불러오고 있습니다", "Loading order data")} />
       ) : error ? (
         <div className="empty-state error-state">
-          <strong>주문 데이터를 불러오지 못했습니다.</strong>
+          <strong>{t("주문 데이터를 불러오지 못했습니다.", "Could not load order data.")}</strong>
           <p>{error}</p>
-          <button className="secondary-action" onClick={loadOrders}>다시 시도</button>
+          <button className="secondary-action" onClick={loadOrders}>{t("다시 시도", "Try again")}</button>
         </div>
       ) : orders.length === 0 ? (
         <div className="empty-state">
           <span className="empty-symbol">B2B</span>
-          <strong>아직 연동된 주문이 없습니다.</strong>
-          <p>구매자 계정에서 주문을 생성하면 이곳에 즉시 표시됩니다.</p>
+          <strong>{t("아직 연동된 주문이 없습니다.", "No orders are connected yet.")}</strong>
+          <p>{t("구매자 계정에서 주문을 생성하면 이곳에 즉시 표시됩니다.", "Orders created from buyer accounts will appear here immediately.")}</p>
         </div>
       ) : (
         <>
         <section className="content-card pipeline-card">
           <div className="card-heading-row">
-            <div><span>SOURCING FLOW</span><h2>소싱·입고 현황</h2></div>
+            <div><span>SOURCING FLOW</span><h2>{t("소싱·입고 현황", "Sourcing & Intake Status")}</h2></div>
           </div>
           <div className="pipeline-row">
             {STATUS_OPTIONS.map(([key, label], index) => (
@@ -125,8 +127,8 @@ function BusinessOrdersPage() {
                 {index > 0 && <span className="pipeline-arrow"><Icon name="chevron_right" /></span>}
                 <div className="pipeline-node">
                   <span className="pipeline-icon"><Icon name={STATUS_ICON[key]} /></span>
-                  <strong>{label}</strong>
-                  <small>{statusCounts[key] || 0}건</small>
+                  <strong>{label[language]}</strong>
+                  <small>{statusCounts[key] || 0}{t("건", "")}</small>
                 </div>
               </Fragment>
             ))}
@@ -136,17 +138,17 @@ function BusinessOrdersPage() {
         <div className="dashboard-grid">
           <section className="content-card orders-table-card">
             <div className="card-heading-row">
-              <div><span>LIVE SOURCING</span><h2>소싱 주문 현황</h2></div>
-              <small>최근 주문순</small>
+              <div><span>LIVE SOURCING</span><h2>{t("소싱 주문 현황", "Live Sourcing Orders")}</h2></div>
+              <small>{t("최근 주문순", "Newest first")}</small>
             </div>
             <div className="table-scroll">
               <table>
                 <thead>
-                  <tr><th>주문</th><th>상품</th><th>출발국</th><th>예상금액</th><th>AI 신뢰도</th><th>상태</th></tr>
+                  <tr><th>{t("주문", "Order")}</th><th>{t("상품", "Product")}</th><th>{t("출발국", "Origin")}</th><th>{t("예상금액", "Estimate")}</th><th>{t("AI 신뢰도", "AI Confidence")}</th><th>{t("상태", "Status")}</th></tr>
                 </thead>
                 <tbody>
                   {orders.map((order) => {
-                    const display = getOrderDisplay(order);
+                    const display = getOrderDisplay(order, language);
                     return (
                       <tr
                         key={order.id}
@@ -156,9 +158,9 @@ function BusinessOrdersPage() {
                         <td>#{String(order.id).padStart(4, "0")}</td>
                         <td><strong>{display.product}</strong><small>{formatDate(order.created_at)}</small></td>
                         <td>{order.origin_country || "-"}</td>
-                        <td>{order.ai_estimate ? formatWon(order.ai_estimate.breakdown?.total_estimated_krw) : "분석 없음"}</td>
+                        <td>{order.ai_estimate ? formatWon(order.ai_estimate.breakdown?.total_estimated_krw) : t("분석 없음", "Not analyzed")}</td>
                         <td><span className={`confidence-tag ${order.ai_estimate?.confidence || "none"}`}>{order.ai_estimate?.confidence || "-"}</span></td>
-                        <td><span className="status-tag">{STATUS_LABEL[order.status] || order.status}</span></td>
+                        <td><span className="status-tag">{STATUS_LABEL[order.status]?.[language] || order.status}</span></td>
                       </tr>
                     );
                   })}
@@ -170,18 +172,18 @@ function BusinessOrdersPage() {
           <aside className="order-detail-card">
             <div className="detail-heading">
               <span>SOURCING INSIGHT</span>
-              <h2>주문 #{String(selectedOrder.id).padStart(4, "0")}</h2>
-              <p>{getOrderDisplay(selectedOrder).product}</p>
+              <h2>{t("주문", "Order")} #{String(selectedOrder.id).padStart(4, "0")}</h2>
+              <p>{getOrderDisplay(selectedOrder, language).product}</p>
             </div>
 
             <div className="detail-route">
-              <div><span>출발</span><strong>{selectedOrder.origin_country || "-"}</strong></div>
-              <div className="route-line"><span>{STATUS_LABEL[displayedStatus] || displayedStatus}</span></div>
-              <div><span>도착</span><strong>KR</strong></div>
+              <div><span>{t("출발", "Origin")}</span><strong>{selectedOrder.origin_country || "-"}</strong></div>
+              <div className="route-line"><span>{STATUS_LABEL[displayedStatus]?.[language] || displayedStatus}</span></div>
+              <div><span>{t("도착", "Destination")}</span><strong>KR</strong></div>
             </div>
 
             <div className="status-actions">
-              <span>진행 단계 변경 (선택 후 적용을 눌러야 반영됩니다)</span>
+              <span>{t("진행 단계 변경 (선택 후 적용을 눌러야 반영됩니다)", "Change progress stage (select a stage, then apply)")}</span>
               <div className="status-actions-row">
                 {STATUS_OPTIONS.map(([value, label]) => (
                   <button
@@ -191,21 +193,21 @@ function BusinessOrdersPage() {
                     disabled={updating || selectedOrder.status === value}
                     onClick={() => setPendingStatus(value)}
                   >
-                    {label}
+                    {label[language]}
                   </button>
                 ))}
               </div>
               {hasPendingChange && (
                 <div className="status-apply-row">
                   <span>
-                    {STATUS_LABEL[selectedOrder.status]} → {STATUS_LABEL[pendingStatus]}로 변경하시겠습니까?
+                    {STATUS_LABEL[selectedOrder.status]?.[language]} → {STATUS_LABEL[pendingStatus]?.[language]} {t("단계로 변경하시겠습니까?", "— apply this change?")}
                   </span>
                   <div>
                     <button type="button" className="secondary-action compact-action" disabled={updating} onClick={() => setPendingStatus(null)}>
-                      취소
+                      {t("취소", "Cancel")}
                     </button>
                     <button type="button" className="kakao-action compact-action" disabled={updating} onClick={applyStatusChange}>
-                      {updating ? "적용 중..." : "적용"}
+                      {updating ? t("적용 중...", "Applying...") : t("적용", "Apply")}
                     </button>
                   </div>
                 </div>
@@ -215,20 +217,20 @@ function BusinessOrdersPage() {
             {estimate ? (
               <>
                 <div className="detail-grid">
-                  <div><span>품목 분류</span><strong>{getOrderDisplay(selectedOrder).category}</strong></div>
+                  <div><span>{t("품목 분류", "Category")}</span><strong>{getOrderDisplay(selectedOrder, language).category}</strong></div>
                   <div><span>HS Code</span><strong>{estimate.hs_code_guess}</strong></div>
-                  <div><span>관세율</span><strong>{estimate.duty_rate_percent}%</strong></div>
-                  <div><span>최종비용</span><strong>{formatWon(estimate.breakdown?.total_estimated_krw)}</strong></div>
+                  <div><span>{t("관세율", "Duty Rate")}</span><strong>{estimate.duty_rate_percent}%</strong></div>
+                  <div><span>{t("최종비용", "Total Cost")}</span><strong>{formatWon(estimate.breakdown?.total_estimated_krw)}</strong></div>
                 </div>
                 <div className="detail-risk">
-                  <strong>AI 통관 체크</strong>
+                  <strong>{t("AI 통관 체크", "AI Customs Check")}</strong>
                   {estimate.risk_notes?.length ? (
-                    <ul>{getOrderDisplay(selectedOrder).risks.map((risk) => <li key={risk}>{risk}</li>)}</ul>
-                  ) : <p>현재 주요 위험요소가 없습니다.</p>}
+                    <ul>{getOrderDisplay(selectedOrder, language).risks.map((risk) => <li key={risk}>{risk}</li>)}</ul>
+                  ) : <p>{t("현재 주요 위험요소가 없습니다.", "No major risks are currently detected.")}</p>}
                 </div>
               </>
             ) : (
-              <div className="detail-risk"><p>이 주문에는 AI 분석 결과가 없습니다.</p></div>
+              <div className="detail-risk"><p>{t("이 주문에는 AI 분석 결과가 없습니다.", "This order has no AI analysis result.")}</p></div>
             )}
           </aside>
         </div>

@@ -36,6 +36,14 @@ if (!userColumnNames.has('profile_image')) {
 
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_kakao_id ON users(kakao_id)`);
 
+// 새 환경에서도 데모 로그인과 주문 데이터가 바로 동작하도록 기본 계정을 보장한다.
+const insertDemoUser = db.prepare(`
+  INSERT OR IGNORE INTO users (email, password, name, role)
+  VALUES (?, '1234', ?, ?)
+`);
+insertDemoUser.run('buyer@mohe.demo', '김모해', 'buyer');
+insertDemoUser.run('business@mohe.demo', '모해물류', 'business');
+
 // ── orders: 상품구매탭에서 만들어지는 주문.
 //    ai_estimate 컬럼에 AI가 뱉은 예측 결과를 JSON 문자열 그대로 저장.
 //    (정규화 안 하고 JSON으로 퉁치는 이유: 시간 없을 때 스키마 변경 없이 필드 추가 가능)
@@ -55,5 +63,10 @@ CREATE TABLE IF NOT EXISTS orders (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 `);
+
+// 해커톤 데모에서 주문·상태·AI 분석 화면이 충분히 보이도록 샘플 주문을 보충한다.
+// product_url의 demo:// 식별값으로 중복 생성을 막아 서버를 여러 번 재시작해도 안전하다.
+const { seedDemoOrders } = require('./seedDemoOrders');
+seedDemoOrders(db);
 
 module.exports = db;

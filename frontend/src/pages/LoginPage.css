@@ -312,7 +312,8 @@
   }
 
   .mobile-brand {
-    display: block;
+    display: inline-flex;
+    height: auto;
     margin-bottom: 24px;
   }
 

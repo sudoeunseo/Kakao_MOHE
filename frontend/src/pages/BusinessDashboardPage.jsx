@@ -8,13 +8,16 @@ import { getOrderDisplay } from "../utils/orderDisplay";
 import useLanguage from "../context/useLanguage";
 
 const STATUS_STEPS = [
-  { key: "pending", ko: "소싱 접수", en: "Sourcing", icon: "shopping_cart" },
-  { key: "paid", ko: "배송대행지 검수", en: "Hub Inspection", icon: "inventory_2" },
-  { key: "shipping", ko: "국제운송", en: "International", icon: "flight_takeoff", tone: "accent" },
-  { key: "customs", ko: "통관", en: "Customs", icon: "policy", tone: "danger" },
-  { key: "domestic", ko: "국내배송", en: "Domestic", icon: "local_shipping" },
-  { key: "delivered", ko: "셀러 입고", en: "Seller Intake", icon: "check_circle" },
+  { key: "pending", ko: "해외상품 주문", en: "Overseas Order", icon: "shopping_cart", statusKey: "pending" },
+  { key: "prediction", ko: "관세·배송일 예측", en: "AI Cost Forecast", icon: "auto_awesome" },
+  { key: "inspection", ko: "검수·합포장", en: "Inspect & Pack", icon: "inventory_2", statusKey: "paid" },
+  { key: "shipping", ko: "국제운송", en: "International", icon: "flight_takeoff", statusKey: "shipping", tone: "accent" },
+  { key: "customs", ko: "통관", en: "Customs", icon: "policy", statusKey: "customs", tone: "danger" },
+  { key: "domestic", ko: "국내배송", en: "Domestic", icon: "local_shipping", statusKey: "domestic" },
+  { key: "delivered", ko: "셀러 입고", en: "Seller Intake", icon: "warehouse", statusKey: "delivered" },
 ];
+
+const ORDER_STATUSES = ["pending", "paid", "shipping", "customs", "domestic", "delivered"];
 
 function formatRevenue(value, language) {
   if (value >= 100000000) return language === "en" ? `₩${(value / 1000000).toFixed(1)}M` : `₩${(value / 100000000).toFixed(1)}억`;
@@ -65,8 +68,8 @@ function BusinessDashboardPage() {
   }, [loadOrders, loadTrend]);
 
   const metrics = useMemo(() => {
-    const statusCounts = STATUS_STEPS.reduce((acc, step) => {
-      acc[step.key] = orders.filter((order) => order.status === step.key).length;
+    const statusCounts = ORDER_STATUSES.reduce((acc, status) => {
+      acc[status] = orders.filter((order) => order.status === status).length;
       return acc;
     }, {});
     const riskOrders = orders.filter((order) => (order.ai_estimate?.risk_notes?.length || 0) > 0);
@@ -75,6 +78,7 @@ function BusinessDashboardPage() {
       paid: statusCounts.paid || 0,
       inTransit: statusCounts.shipping || 0,
       riskOrders,
+      analyzed: orders.filter((order) => order.ai_estimate).length,
       todayRevenue: orders.reduce(
         (sum, order) =>
           sum +
@@ -132,6 +136,14 @@ function BusinessDashboardPage() {
         </div>
       ) : (
         <>
+          <header className="dashboard-intro">
+            <div>
+              <h1>{t("판매자 대시보드", "Seller Dashboard")}</h1>
+              <p>{t("카카오 MOHE 해외 소싱과 배송대행지 운영 현황을 한눈에 확인합니다.", "Monitor Kakao MOHE overseas sourcing and shipping hub operations at a glance.")}</p>
+            </div>
+            <span className="dashboard-live-badge"><i /> {t("실시간 연동중", "Live connected")}</span>
+          </header>
+
           <section className="kpi-grid dashboard-kpi-grid">
             <article className="kpi-card">
               <div className="kpi-card-head"><span>{t("오늘 소싱 주문", "Today's Sourcing Orders")}</span></div>
@@ -158,23 +170,47 @@ function BusinessDashboardPage() {
           <section className="home-grid">
             <div className="content-card dashboard-status-card">
               <div className="card-heading-row">
-                <div><h2>{t("소싱·입고 현황", "Sourcing & Intake Status")}</h2></div>
+                <div>
+                  <span>{t("전체 허브 경로", "FULL HUB ROUTE")}</span>
+                  <h2>{t("7단계 통합 소싱·물류 현황", "7-Stage Sourcing & Logistics")}</h2>
+                </div>
                 <button className="text-link-action" onClick={() => navigate("/business/orders")}>{t("상세보기", "View details")} <Icon name="chevron_right" /></button>
               </div>
               <div className="dashboard-flow">
                 {STATUS_STEPS.map((step, index) => {
-                  const count = metrics.statusCounts[step.key] || 0;
+                  const count = step.key === "prediction"
+                    ? metrics.analyzed
+                    : metrics.statusCounts[step.statusKey] || 0;
                   return (
-                    <div key={step.key} className={`dashboard-flow-step ${step.tone || ""}`}>
+                    <button
+                      type="button"
+                      key={step.key}
+                      className={`dashboard-flow-step ${step.tone || ""}`}
+                      onClick={() => navigate("/business/orders")}
+                    >
+                      <small>STEP {String(index + 1).padStart(2, "0")}</small>
                       <div className="dashboard-flow-icon">
                         <Icon name={step.icon} />
                       </div>
                       <strong>{t(step.ko, step.en)}</strong>
-                      <span>{count.toLocaleString(language === "en" ? "en-US" : "ko-KR")}</span>
-                      {index < STATUS_STEPS.length - 1 && <i aria-hidden="true" />}
-                    </div>
+                      <span>{count.toLocaleString(language === "en" ? "en-US" : "ko-KR")}{t("건", "")}</span>
+                    </button>
                   );
                 })}
+              </div>
+              <div className="dashboard-live-notices">
+                <div className="dashboard-notice-heading">
+                  <strong><Icon name="campaign" /> {t("실시간 물류 알림", "Live Logistics Updates")}</strong>
+                  <small>{t("최근 업데이트: 방금 전", "Updated just now")}</small>
+                </div>
+                <div>
+                  <p><i className="ok" /> {t("MOHE 해외 배송대행지와 주문 데이터가 정상 연동 중입니다.", "MOHE overseas hubs and order data are connected normally.")}</p>
+                  <p className={metrics.riskOrders.length ? "warning" : ""}>
+                    <i /> {metrics.riskOrders.length
+                      ? t(`통관 확인이 필요한 주문 ${metrics.riskOrders.length}건이 감지되었습니다.`, `${metrics.riskOrders.length} orders require customs review.`)
+                      : t("현재 긴급하게 확인할 통관 지연은 없습니다.", "No urgent customs delays are currently detected.")}
+                  </p>
+                </div>
               </div>
             </div>
 

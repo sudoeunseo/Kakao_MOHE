@@ -8,7 +8,7 @@ const bi = (ko, en) => ({ ko, en });
 const INQUIRIES = [
   {
     id: "#9021",
-    date: "2023.10.24 14:30",
+    date: "2026.08.13 14:30",
     product: bi("[대량] 표준 팔레트 A", "[Bulk] Standard Pallet A"),
     buyer: bi("김 물류", "Kim Logistics"),
     title: bi("대량 주문 배송 시간 확인", "Delivery time for a bulk order"),
@@ -20,7 +20,7 @@ const INQUIRIES = [
   },
   {
     id: "#9020",
-    date: "2023.10.24 11:15",
+    date: "2026.08.13 11:15",
     product: bi("산업용 선반 유닛", "Industrial Shelving Unit"),
     buyer: bi("서울 공급사", "Seoul Supply Co."),
     title: bi("적재 용량 사양 문의", "Load capacity specifications"),
@@ -32,7 +32,7 @@ const INQUIRIES = [
   },
   {
     id: "#9019",
-    date: "2023.10.23 16:45",
+    date: "2026.08.12 16:45",
     product: bi("지게차 부품 번들", "Forklift Parts Bundle"),
     buyer: bi("부산 중공업", "Busan Heavy Industries"),
     title: bi("모델 X-200과의 호환성", "Compatibility with model X-200"),
@@ -44,7 +44,7 @@ const INQUIRIES = [
   },
   {
     id: "#9018",
-    date: "2023.10.23 09:20",
+    date: "2026.08.12 09:20",
     product: bi("포장용 테이프 (500롤)", "Packing Tape (500 rolls)"),
     buyer: bi("글로벌 무역 파트너스", "Global Trade Partners"),
     title: bi("대량 할인 가격 요청", "Bulk discount request"),
@@ -56,7 +56,7 @@ const INQUIRIES = [
   },
   {
     id: "#9017",
-    date: "2023.10.22 17:10",
+    date: "2026.08.11 17:10",
     product: bi("일본 한정 과일 젤리", "Japan Limited Fruit Jelly"),
     buyer: bi("도쿄 셀렉트", "Tokyo Select"),
     title: bi("오사카 배송대행지 입고 일정", "Osaka shipping hub arrival schedule"),
@@ -67,7 +67,7 @@ const INQUIRIES = [
   },
   {
     id: "#9016",
-    date: "2023.10.22 13:25",
+    date: "2026.08.11 13:25",
     product: bi("프리미엄 녹차 세트", "Premium Green Tea Set"),
     buyer: bi("마루 상점", "Maru Store"),
     title: bi("선물 포장 옵션 문의", "Gift wrapping options"),
@@ -79,7 +79,7 @@ const INQUIRIES = [
   },
   {
     id: "#9015",
-    date: "2023.10.21 15:40",
+    date: "2026.08.10 15:40",
     product: bi("캐릭터 머그컵 24개입", "Character Mugs, Pack of 24"),
     buyer: bi("하늘 유통", "Haneul Distribution"),
     title: bi("파손 보상 기준 확인", "Damage compensation policy"),
@@ -90,7 +90,7 @@ const INQUIRIES = [
   },
   {
     id: "#9014",
-    date: "2023.10.21 10:05",
+    date: "2026.08.10 10:05",
     product: bi("스테인리스 텀블러", "Stainless Steel Tumblers"),
     buyer: bi("제이앤코", "J&Co"),
     title: bi("상품 검수 사진 요청", "Product inspection photos"),
@@ -102,7 +102,7 @@ const INQUIRIES = [
   },
   {
     id: "#9013",
-    date: "2023.10.20 18:20",
+    date: "2026.08.09 18:20",
     product: bi("한정판 스니커즈", "Limited Edition Sneakers"),
     buyer: bi("어반 컬렉트", "Urban Collect"),
     title: bi("정품 검수 서비스 문의", "Authenticity inspection service"),
@@ -113,7 +113,7 @@ const INQUIRIES = [
   },
   {
     id: "#9012",
-    date: "2023.10.20 14:10",
+    date: "2026.08.09 14:10",
     product: bi("휴대용 미니 선풍기", "Portable Mini Fans"),
     buyer: bi("온리마켓", "Only Market"),
     title: bi("배터리 포함 상품 운송", "Shipping products with batteries"),
@@ -125,7 +125,7 @@ const INQUIRIES = [
   },
   {
     id: "#9011",
-    date: "2023.10.19 12:50",
+    date: "2026.08.08 12:50",
     product: bi("세라믹 식기 세트", "Ceramic Tableware Set"),
     buyer: bi("리빙하우스", "Living House"),
     title: bi("완충 포장 추가 비용", "Extra protective packaging fee"),
@@ -136,7 +136,7 @@ const INQUIRIES = [
   },
   {
     id: "#9010",
-    date: "2023.10.19 08:45",
+    date: "2026.08.08 08:45",
     product: bi("유기농 스낵 박스", "Organic Snack Box"),
     buyer: bi("그린바스켓", "Green Basket"),
     title: bi("식품 통관 서류 확인", "Food customs documents"),
@@ -215,7 +215,7 @@ function InquiriesPreviewPage() {
 
       <section className="content-card orders-table-card">
         <div className="inquiry-filters">
-          <input type="text" placeholder="2023.10.01 - 2023.10.31" readOnly />
+          <input type="text" placeholder="2026.08.01 - 2026.08.31" readOnly />
           <select disabled defaultValue="all">
             <option value="all">{t("모든 상태", "All statuses")}</option>
           </select>

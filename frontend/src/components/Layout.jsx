@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
 import Icon from "./Icon";
+import BrandLogo from "./BrandLogo";
 import useLanguage from "../context/useLanguage";
 import "../pages/BuyerPortal.css";
 
@@ -42,9 +42,7 @@ function Layout({ children, title, description, actions, topbarTitle, dashboard 
     <div className={`app-shell ${isBusiness ? "business-shell" : "buyer-shell"}`}>
       <aside className={`sidebar ${isBusiness ? "business-sidebar" : "buyer-sidebar"}`}>
         <div className="app-brand">
-          <span className="app-brand-mark">
-            <img src={logo} alt="Kakao MOHE" />
-          </span>
+          <BrandLogo tone="light" />
           <span className={isBusiness ? "seller-tag" : "buyer-brand-tag"}>
             {isBusiness ? "SELLER ACCOUNT" : "Buyer Portal"}
           </span>
@@ -98,7 +96,10 @@ function Layout({ children, title, description, actions, topbarTitle, dashboard 
       <div className="app-main">
         {!isBusiness && (
           <header className="buyer-topbar">
-            <strong>{topbarTitle || title}</strong>
+            <div className="buyer-topbar-leading">
+              <BrandLogo compact />
+              <strong>{topbarTitle || title}</strong>
+            </div>
             <div className="buyer-utilities" aria-label="구매자 빠른 메뉴">
               <span title="배송 위치">⌖</span>
               <span title="알림">♢</span>
@@ -108,9 +109,7 @@ function Layout({ children, title, description, actions, topbarTitle, dashboard 
         )}
         <header className="mobile-header">
           <div className="app-brand compact">
-            <span className="app-brand-mark">
-              <img src={logo} alt="Kakao MOHE" />
-            </span>
+            <BrandLogo tone="light" compact />
           </div>
           <button type="button" className="text-button" onClick={logout}>
             {t("로그아웃", "Log out")}
@@ -119,6 +118,7 @@ function Layout({ children, title, description, actions, topbarTitle, dashboard 
 
         {isBusiness && (
           <header className="top-bar">
+            <BrandLogo compact />
             <div className="top-bar-search">
               <Icon name="search" />
               <input type="text" placeholder={t("검색 (주문번호, 상품명)", "Search (order no., product)")} readOnly />

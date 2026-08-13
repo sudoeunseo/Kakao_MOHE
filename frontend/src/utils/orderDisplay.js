@@ -25,6 +25,18 @@ const ORDER_DISPLAY_FALLBACKS = {
   },
 };
 
+const CATEGORY_TRANSLATIONS = {
+  "식품/간식": "Food / Snacks",
+  "생활가전": "Home Appliances",
+  "의류/아우터": "Apparel / Outerwear",
+  "향수/화장품": "Perfume / Cosmetics",
+  "화장품/바디케어": "Cosmetics / Body Care",
+  "완구/취미": "Toys / Hobbies",
+  "전자제품/게임기": "Electronics / Gaming",
+  "미용가전": "Beauty Appliances",
+  "전자제품/키보드": "Electronics / Keyboards",
+};
+
 export function isBrokenText(value) {
   if (typeof value !== "string" || !value.trim()) return true;
   const brokenCharacters = (value.match(/[?�]/g) || []).length;
@@ -42,13 +54,19 @@ export function getOrderDisplay(order, language = "ko") {
     },
   };
   const sourceRisks = order.ai_estimate?.risk_notes || [];
+  const sourceCategory = order.ai_estimate?.category;
   const risks = locale === "ko" && sourceRisks.length > 0 && sourceRisks.every((risk) => !isBrokenText(risk))
     ? sourceRisks
     : fallback.risks[locale];
+  const category = isBrokenText(sourceCategory)
+    ? fallback.category[locale]
+    : locale === "en"
+      ? CATEGORY_TRANSLATIONS[sourceCategory] || sourceCategory
+      : sourceCategory;
 
   return {
     product: isBrokenText(order.product_name) ? fallback.product[locale] : order.product_name,
-    category: locale === "en" || isBrokenText(order.ai_estimate?.category) ? fallback.category[locale] : order.ai_estimate.category,
+    category,
     risks,
     risk: risks[0],
   };
