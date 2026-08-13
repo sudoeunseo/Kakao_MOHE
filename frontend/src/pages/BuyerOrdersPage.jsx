@@ -10,6 +10,7 @@ function BuyerOrdersPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const created = new URLSearchParams(location.search).get("created") === "1";
@@ -30,6 +31,10 @@ function BuyerOrdersPage() {
   useEffect(() => {
     loadOrders();
   }, [loadOrders]);
+
+  const visibleOrders = orders.filter((order) =>
+    order.product_name?.toLowerCase().includes(query.trim().toLowerCase()),
+  );
 
   return (
     <Layout
@@ -52,6 +57,21 @@ function BuyerOrdersPage() {
         </div>
       )}
 
+      {!loading && !error && orders.length > 0 && (
+        <>
+          <div className="buyer-delivery-metrics">
+            <article><span>전체 배송</span><strong>{orders.length}</strong><i className="material-symbols-outlined">local_shipping</i></article>
+            <article className="blue"><span>해외 배송중</span><strong>{orders.filter((order) => order.status === "shipping").length}</strong><i className="material-symbols-outlined">flight_takeoff</i></article>
+            <article className="orange"><span>통관 진행중</span><strong>{orders.filter((order) => order.status === "customs").length}</strong><i className="material-symbols-outlined">gavel</i></article>
+            <article className="green"><span>배송 완료</span><strong>{orders.filter((order) => order.status === "delivered").length}</strong><i className="material-symbols-outlined">package_2</i></article>
+          </div>
+          <label className="buyer-order-search">
+            <span className="material-symbols-outlined">search</span>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="주문번호 또는 상품명 검색" />
+          </label>
+        </>
+      )}
+
       {loading ? (
         <LoadingSpinner label="주문을 불러오고 있습니다" />
       ) : error ? (
@@ -69,9 +89,11 @@ function BuyerOrdersPage() {
             상품 분석하러 가기
           </button>
         </div>
+      ) : visibleOrders.length === 0 ? (
+        <div className="empty-state"><strong>검색 결과가 없습니다.</strong><p>다른 상품명으로 다시 검색해 주세요.</p></div>
       ) : (
         <div className="order-list">
-          {orders.map((order) => <OrderCard key={order.id} order={order} />)}
+          {visibleOrders.map((order) => <OrderCard key={order.id} order={order} />)}
         </div>
       )}
     </Layout>
