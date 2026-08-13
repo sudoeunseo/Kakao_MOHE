@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Icon from "../components/Icon";
 import useLanguage from "../context/useLanguage";
@@ -149,17 +149,40 @@ const INQUIRIES = [
 ];
 
 const PAGE_SIZE = 4;
+const REPLIES_STORAGE_KEY = "moheInquiryRepliesV2";
+const REMOVED_MESSAGE_PATTERN = /기모띠/i;
+
+function loadSavedReplies() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REPLIES_STORAGE_KEY) || "{}");
+    return Object.fromEntries(
+      Object.entries(saved).map(([id, replies]) => [
+        id,
+        Array.isArray(replies)
+          ? replies.filter((reply) => reply?.from === "seller" && typeof reply.text === "string" && reply.text.trim() && !REMOVED_MESSAGE_PATTERN.test(reply.text))
+          : [],
+      ]),
+    );
+  } catch {
+    return {};
+  }
+}
 
 function InquiriesPreviewPage() {
   const { language, t } = useLanguage();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [draft, setDraft] = useState("");
-  const [sentReplies, setSentReplies] = useState({});
+  const [sentReplies, setSentReplies] = useState(loadSavedReplies);
   const pageCount = Math.ceil(INQUIRIES.length / PAGE_SIZE);
   const firstIndex = (currentPage - 1) * PAGE_SIZE;
   const visibleInquiries = INQUIRIES.slice(firstIndex, firstIndex + PAGE_SIZE);
   const localize = (value) => (typeof value === "string" ? value : value[language]);
+  const repliedCount = Object.values(sentReplies).filter((replies) => replies.length > 0).length;
+
+  useEffect(() => {
+    localStorage.setItem(REPLIES_STORAGE_KEY, JSON.stringify(sentReplies));
+  }, [sentReplies]);
 
   function goToPage(page) {
     const nextPage = Math.min(Math.max(page, 1), pageCount);
@@ -195,7 +218,9 @@ function InquiriesPreviewPage() {
 
   const conversation = selectedInquiry
     ? [...selectedInquiry.messages, ...(sentReplies[selectedInquiry.id] || [])]
+      .filter((message) => !REMOVED_MESSAGE_PATTERN.test(localize(message.text)))
     : [];
+  const canReply = selectedInquiry?.status === "waiting" && !sentReplies[selectedInquiry.id]?.length;
 
   return (
     <Layout
@@ -209,8 +234,8 @@ function InquiriesPreviewPage() {
 
       <section className="metric-grid three">
         <article className="metric-card"><span>{t("총 문의", "Total inquiries")}</span><strong>1,248</strong><p>{t("이번 주 +12%", "+12% this week")}</p></article>
-        <article className="metric-card warning-metric"><span>{t("답변 대기중", "Awaiting reply")}</span><strong className="negative">42</strong><p>{t("긴급", "Urgent")}</p></article>
-        <article className="metric-card"><span>{t("오늘 해결됨", "Resolved today")}</span><strong>156</strong><p>{t("우수한 응답 시간", "Excellent response time")}</p></article>
+        <article className="metric-card warning-metric"><span>{t("답변 대기중", "Awaiting reply")}</span><strong className="negative">{42 - repliedCount}</strong><p>{t("긴급", "Urgent")}</p></article>
+        <article className="metric-card"><span>{t("오늘 해결됨", "Resolved today")}</span><strong>{156 + repliedCount}</strong><p>{t("우수한 응답 시간", "Excellent response time")}</p></article>
       </section>
 
       <section className="content-card orders-table-card">
@@ -319,15 +344,31 @@ function InquiriesPreviewPage() {
               ))}
             </div>
 
-            <form className="conversation-reply" onSubmit={sendReply}>
-              <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={t("고객에게 보낼 답변을 입력하세요.", "Write a reply to the customer.")} rows="3" />
-              <div>
-                <small>{t("데모 화면에서는 입력한 답변이 현재 화면에만 저장됩니다.", "In this demo, your reply is saved only on the current screen.")}</small>
-                <button type="submit" disabled={!draft.trim()}>
-                  {t("답변 보내기", "Send reply")} <Icon name="send" />
-                </button>
+            {canReply ? (
+              <form className="conversation-reply" onSubmit={sendReply}>
+                <textarea
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") event.currentTarget.form?.requestSubmit();
+                  }}
+                  placeholder={t("고객에게 보낼 답변을 입력하세요.", "Write a reply to the customer.")}
+                  rows="3"
+                  autoFocus
+                />
+                <div>
+                  <small>{t("전송한 답변은 저장되며 문의 상태가 답변완료로 변경됩니다. Ctrl+Enter로 전송할 수 있습니다.", "The reply is saved and the inquiry is marked answered. Press Ctrl+Enter to send.")}</small>
+                  <button type="submit" disabled={!draft.trim()}>
+                    {t("답변 보내기", "Send reply")} <Icon name="send" />
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="conversation-resolved">
+                <Icon name="check_circle" />
+                <div><strong>{t("답변이 완료된 문의입니다.", "This inquiry has been answered.")}</strong><span>{t("추가 답변이 필요하면 문의 상태를 다시 열어 주세요.", "Reopen the inquiry if another reply is required.")}</span></div>
               </div>
-            </form>
+            )}
           </aside>
         </div>
       )}

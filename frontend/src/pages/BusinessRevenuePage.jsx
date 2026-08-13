@@ -227,7 +227,10 @@ function BusinessRevenuePage() {
                     : t(trend.summary, "The forecast reflects the currently limited order data and will become more precise as additional orders accumulate.")}</h2>
               </div>
               {trend && !trendLoading && !trendError && (
-                <span className={`confidence-tag ${trend.confidence}`}>{t("신뢰도", "Confidence")} {trend.confidence}</span>
+                <div className="forecast-status-group">
+                  {trend.__fallback && <span className="forecast-source-tag">{t("통계 안전 모드", "Statistical fallback")}</span>}
+                  <span className={`confidence-tag ${trend.confidence}`}>{t("신뢰도", "Confidence")} {trend.confidence}</span>
+                </div>
               )}
             </div>
             {!trendLoading && !trendError && (
@@ -237,6 +240,12 @@ function BusinessRevenuePage() {
                   <div className="readiness-track"><i style={{ width: `${dataReadiness.score}%` }} /></div>
                   <p>{t("실제 데이터의 양·관측 기간·AI 분석 완성도를 합산한 점수입니다.", "A combined score for sample size, observation period, and estimate completeness.")}</p>
                 </div>
+                {trend.__fallback && (
+                  <div className="fallback-explanation">
+                    <strong>{t("AI 제공자 한도 초과로 실제 주문 통계 예측을 표시 중입니다.", "The AI provider limit was reached, so a forecast based on real order statistics is shown.")}</strong>
+                    <span>{t("Gemini 할당량이 복구되면 다시 예측하기 버튼으로 생성형 AI 분석을 갱신할 수 있습니다.", "When the Gemini quota recovers, run the forecast again to refresh the generative AI analysis.")}</span>
+                  </div>
+                )}
                 <div className="evidence-stat"><span>{t("실제 주문", "Real orders")}</span><strong>{realStats.totalOrders}{t("건", "")}</strong></div>
                 <div className="evidence-stat"><span>{t("관측 일수", "Observed days")}</span><strong>{dataReadiness.observedDays}{t("일", " days")}</strong></div>
                 <div className="evidence-stat"><span>{t("출발 국가", "Origin countries")}</span><strong>{dataReadiness.countries}{t("개국", "")}</strong></div>
@@ -322,6 +331,7 @@ function TrendChart({ data, language }) {
   const slot = (right - left) / data.length;
   const maxOrders = Math.max(1, ...data.map((item) => item.orders));
   const maxFee = Math.max(1, ...data.map((item) => item.cumulativeFee));
+  const labelStride = Math.max(1, Math.ceil(data.length / 11));
   const points = data.map((item, index) => ({
     ...item,
     x: left + (slot * index) + (slot / 2),
@@ -344,7 +354,7 @@ function TrendChart({ data, language }) {
         <text x="8" y={top + 4} className="chart-axis-label">{compactWon(maxFee, language)}</text>
         <text x="20" y={bottom + 4} className="chart-axis-label">0</text>
         <path d={area} className="fee-area" />
-        {points.map((point) => {
+        {points.map((point, index) => {
           const barHeight = (point.orders / maxOrders) * 92;
           const barWidth = Math.min(30, slot * 0.38);
           return (
@@ -353,7 +363,9 @@ function TrendChart({ data, language }) {
                 <title>{point.date}: {point.orders} orders</title>
               </rect>
               <text x={point.x} y={bottom - barHeight - 8} textAnchor="middle" className="bar-value">{point.orders}</text>
-              <text x={point.x} y="249" textAnchor="middle" className="chart-date-label">{point.date.slice(5).replace("-", "/")}</text>
+              {(index % labelStride === 0 || index === points.length - 1) && (
+                <text x={point.x} y="249" textAnchor="middle" className="chart-date-label">{point.date.slice(5).replace("-", "/")}</text>
+              )}
             </g>
           );
         })}

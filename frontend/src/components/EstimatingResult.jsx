@@ -27,7 +27,7 @@ function EstimatingResult({
     <section className="result-card" aria-live="polite">
       <div className="result-hero">
         <div>
-          <span className="success-badge">AI 분석 완료</span>
+          <span className="success-badge">{estimate.__fallback ? "MOHE 비용 계산 완료" : "AI 분석 완료"}</span>
           <p>예상 최종 결제금액</p>
           <strong>{formatWon(breakdown.total_estimated_krw)}</strong>
           <small>실제 통관 결과와 환율에 따라 달라질 수 있습니다.</small>
@@ -67,9 +67,9 @@ function EstimatingResult({
       </div>
 
       <div className="ai-note">
-        <span className="note-icon">AI</span>
+        <span className="note-icon">{estimate.__fallback ? "M" : "AI"}</span>
         <div>
-          <strong>분석 요약</strong>
+          <strong>{estimate.__fallback ? "통계 안전 모드" : "분석 요약"}</strong>
           <p>{estimate.note}</p>
         </div>
       </div>

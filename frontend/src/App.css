@@ -393,6 +393,8 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
 .briefing-more { margin: 0 24px; }
 .wide-briefing { margin-bottom: 18px; }
 .wide-briefing .card-heading-row { padding: 24px 26px 12px; }
+.forecast-status-group { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.forecast-source-tag { padding: 5px 8px; border-radius: 7px; color: #685600; background: #fff0a8; font-size: 9px; font-weight: 900; }
 
 .revenue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .category-list { margin: 0; padding: 0 24px 24px; display: grid; gap: 8px; list-style: none; }
@@ -449,6 +451,9 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
 .forecast-range { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(170px, .7fr) minmax(260px, 1fr) 1.5fr; align-items: center; gap: 16px; }
 .forecast-range strong { color: var(--navy); font-size: 15px; }
 .forecast-range small { color: #837440; font-size: 10px; line-height: 1.45; }
+.fallback-explanation { grid-column: 1 / -1; padding: 12px 14px; display: grid; gap: 4px; border: 1px solid #ead479; border-radius: 10px; color: #5f500d; background: #fff8d8; }
+.fallback-explanation strong { font-size: 11px; }
+.fallback-explanation span { color: #82733a; font-size: 9px; line-height: 1.45; }
 
 .category-chart-layout { padding: 2px 24px 26px; display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: center; gap: 28px; }
 .category-donut { width: 160px; height: 160px; display: grid; place-items: center; border-radius: 50%; }
@@ -615,7 +620,7 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
 .conversation-subject { padding: 16px 20px; display: grid; gap: 5px; border-bottom: 1px solid var(--line); background: white; }
 .conversation-subject span { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .5px; }
 .conversation-subject strong { color: var(--navy); font-size: 13px; }
-.conversation-messages { flex: 1; padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.conversation-messages { min-height: 0; flex: 1; padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
 .conversation-date { align-self: center; padding: 5px 10px; border-radius: 999px; color: #7c8595; background: #e7eaf0; font-size: 9px; }
 .conversation-message { max-width: 86%; display: flex; align-items: flex-end; gap: 8px; }
 .conversation-message.seller { align-self: flex-end; flex-direction: row-reverse; }
@@ -625,7 +630,7 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
 .conversation-message.seller p { border-color: #ead479; border-radius: 14px 4px 14px 14px; color: #3f3500; background: #fff3ba; }
 .conversation-message time { color: #939baa; font-size: 8px; }
 .conversation-message.seller time { text-align: right; }
-.conversation-reply { padding: 16px 20px 18px; display: grid; gap: 10px; border-top: 1px solid var(--line); background: white; }
+.conversation-reply { padding: 16px 20px 18px; display: grid; flex: 0 0 auto; gap: 10px; border-top: 1px solid var(--line); background: white; }
 .conversation-reply textarea { width: 100%; min-height: 78px; padding: 12px 14px; resize: none; border: 1px solid #d8dde6; border-radius: 10px; outline: 0; color: var(--navy); background: #fafbfc; font: inherit; font-size: 12px; line-height: 1.5; }
 .conversation-reply textarea:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(23,33,58,.08); background: white; }
 .conversation-reply > div { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
@@ -633,6 +638,11 @@ tbody tr:hover, .selected-row { background: #f5f8ff; }
 .conversation-reply button { padding: 10px 14px; display: flex; align-items: center; gap: 7px; border-radius: 9px; color: var(--navy); background: var(--yellow); font-size: 11px; font-weight: 800; cursor: pointer; }
 .conversation-reply button:disabled { opacity: .45; cursor: not-allowed; }
 .conversation-reply button .material-symbols-outlined { font-size: 16px; }
+.conversation-resolved { padding: 17px 20px; display: flex; align-items: center; flex: 0 0 auto; gap: 11px; border-top: 1px solid #cfe9dd; color: #157052; background: #f1faf6; }
+.conversation-resolved > .material-symbols-outlined { font-size: 24px; }
+.conversation-resolved > div { display: grid; gap: 3px; }
+.conversation-resolved strong { font-size: 11px; }
+.conversation-resolved span { color: #628176; font-size: 9px; }
 
 @keyframes conversation-slide-in {
   from { opacity: 0; transform: translateX(36px); }

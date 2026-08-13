@@ -88,26 +88,112 @@ async function estimateCost(input) {
 
 위 정보를 바탕으로 예측 결과를 산출해줘.`;
 
-  const response = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL || 'gemini-flash-latest', // .env에서 GEMINI_MODEL로 덮어쓸 수 있음. 계정마다 열려있는 모델이 달라서 'latest' 별칭을 기본값으로 둠.
-    contents: userPrompt,
-    config: {
-      systemInstruction: SYSTEM_PROMPT,
-      responseMimeType: 'application/json',
-      responseSchema: RESPONSE_SCHEMA,
-    },
-  });
-
-  const rawText = response.text.trim();
-
-  let parsed;
   try {
-    parsed = JSON.parse(rawText);
-  } catch (err) {
-    throw new Error(`AI 응답 JSON 파싱 실패: ${err.message}\n원본 응답: ${rawText}`);
-  }
+    const response = await withTimeout(
+      ai.models.generateContent({
+        model: process.env.GEMINI_MODEL || 'gemini-flash-latest',
+        contents: userPrompt,
+        config: {
+          systemInstruction: SYSTEM_PROMPT,
+          responseMimeType: 'application/json',
+          responseSchema: RESPONSE_SCHEMA,
+        },
+      }),
+      12000,
+      'Gemini 비용 예측 응답 제한시간 12초를 초과했습니다.',
+    );
 
-  return parsed;
+    return JSON.parse(response.text.trim());
+  } catch (error) {
+    console.warn('[estimate] Gemini 호출 실패, 규칙 기반 비용 예측으로 대체:', error.message);
+    return buildCostFallback(input, error);
+  }
 }
 
-module.exports = { estimateCost };
+const EXCHANGE_RATES_KRW = {
+  USD: 1350,
+  JPY: 9.5,
+  EUR: 1480,
+  CNY: 190,
+  KRW: 1,
+  GBP: 1800,
+  CAD: 1000,
+  AUD: 870,
+};
+
+const PRODUCT_RULES = [
+  { pattern: /운동화|스니커|shoe|sneaker|nike|adidas|new balance/i, category: '신발/스니커즈', hs: '6404', duty: 13 },
+  { pattern: /향수|perfume|fragrance|eau de parfum|cologne/i, category: '향수/화장품', hs: '3303', duty: 6.5, regulated: true },
+  { pattern: /화장품|크림|세럼|로션|cosmetic|skincare|balm/i, category: '화장품/바디케어', hs: '3304', duty: 6.5, regulated: true },
+  { pattern: /재킷|의류|셔츠|바지|jacket|shirt|apparel|clothing/i, category: '의류/아우터', hs: '6201', duty: 13 },
+  { pattern: /초콜릿|젤리|스낵|식품|chocolate|jelly|snack|food/i, category: '식품/간식', hs: '1806', duty: 8, regulated: true },
+  { pattern: /키보드|keyboard/i, category: '전자제품/키보드', hs: '8471', duty: 0, regulated: true },
+  { pattern: /카메라|이어폰|헤드폰|게임기|전자|camera|earphone|headphone|switch|electronic/i, category: '전자제품', hs: '8525', duty: 0, regulated: true },
+  { pattern: /레고|완구|피규어|lego|toy|model kit/i, category: '완구/취미', hs: '9503', duty: 0 },
+];
+
+function buildCostFallback(input, error) {
+  const priceAmount = Math.max(0, Number(input.priceAmount) || 0);
+  const currency = String(input.priceCurrency || 'USD').toUpperCase();
+  const exchangeRate = EXCHANGE_RATES_KRW[currency] || EXCHANGE_RATES_KRW.USD;
+  const productPriceKrw = Math.round(priceAmount * exchangeRate);
+  const rule = PRODUCT_RULES.find((item) => item.pattern.test(input.productName || ''))
+    || { category: '기타 상품', hs: '9999', duty: 8 };
+  const usdValue = productPriceKrw / EXCHANGE_RATES_KRW.USD;
+  const dutyFreeThreshold = input.originCountry === 'US' ? 200 : 150;
+  const isDutyFreeLikely = usdValue < dutyFreeThreshold && !rule.regulated;
+  const shippingKrw = input.shippingMode === 'direct'
+    ? 0
+    : Math.round(Math.min(65000, Math.max(15000, 15000 + (productPriceKrw * 0.055))));
+  const dutyKrw = isDutyFreeLikely ? 0 : Math.round(productPriceKrw * (rule.duty / 100));
+  const vatKrw = isDutyFreeLikely ? 0 : Math.round((productPriceKrw + shippingKrw + dutyKrw) * 0.1);
+  const dutyAndVatKrw = dutyKrw + vatKrw;
+  const platformFeeKrw = Math.max(3000, Math.round(productPriceKrw * 0.03));
+  const totalKrw = productPriceKrw + shippingKrw + dutyAndVatKrw + platformFeeKrw;
+
+  const riskNotes = [
+    `${rule.category} 기준의 추정 HS Code와 기본 관세율을 적용했습니다. 실제 세관 분류에 따라 달라질 수 있습니다.`,
+    input.shippingMode === 'direct'
+      ? '직배송으로 입력되어 국제배송비는 구매자가 별도 결제하는 것으로 계산했습니다.'
+      : '배송대행지 기본 운임을 적용했으며 실측 무게와 부피에 따라 변동될 수 있습니다.',
+  ];
+  if (rule.regulated) riskNotes.push('인증·성분·배터리 등 품목별 수입요건을 통관 전에 확인해 주세요.');
+
+  return {
+    category: rule.category,
+    hs_code_guess: rule.hs,
+    duty_rate_percent: isDutyFreeLikely ? 0 : rule.duty,
+    is_duty_free_likely: isDutyFreeLikely,
+    breakdown: {
+      product_price_krw: productPriceKrw,
+      intl_shipping_krw: shippingKrw,
+      duty_and_vat_krw: dutyAndVatKrw,
+      platform_fee_krw: platformFeeKrw,
+      total_estimated_krw: totalKrw,
+    },
+    confidence: 'medium',
+    risk_notes: riskNotes,
+    note: 'Gemini 한도 초과로 환율·품목·면세 기준을 적용한 MOHE 통계 계산 결과입니다.',
+    __fallback: true,
+    __fallback_reason: classifyFallbackReason(error),
+  };
+}
+
+function classifyFallbackReason(error) {
+  const message = String(error?.message || '');
+  if (/429|quota|resource_exhausted|too many requests/i.test(message)) return 'quota';
+  if (/시간|timeout/i.test(message)) return 'timeout';
+  return 'provider_error';
+}
+
+function withTimeout(promise, timeoutMs, message) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), timeoutMs);
+    promise.then(
+      (value) => { clearTimeout(timer); resolve(value); },
+      (error) => { clearTimeout(timer); reject(error); },
+    );
+  });
+}
+
+module.exports = { estimateCost, buildCostFallback };
