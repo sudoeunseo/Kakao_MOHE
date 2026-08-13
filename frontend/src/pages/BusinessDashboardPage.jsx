@@ -15,7 +15,9 @@ function BusinessDashboardPage() {
     try {
       const result = await api("/api/orders/all");
       setOrders(result);
-      setSelectedOrder((current) => current || result[0] || null);
+      setSelectedOrder((current) =>
+        result.find((order) => order.id === current?.id) || result[0] || null,
+      );
     } catch (requestError) {
       setError(requestError.message);
     } finally {
