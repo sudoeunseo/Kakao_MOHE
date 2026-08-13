@@ -1,0 +1,6 @@
+node_modules/
+.env
+mohe.db
+mohe.db-shm
+mohe.db-wal
+*.log
