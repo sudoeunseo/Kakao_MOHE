@@ -11,6 +11,7 @@ const orderRoutes = require('./routes/orders');
 const kakaopayRoutes = require('./routes/kakaopay');
 const customsDelayRoutes = require('./routes/customsDelay');
 const businessTrendRoutes = require('./routes/businessTrend');
+const productRoutes = require('./routes/product');
 
 const app = express();
 app.use(cors()); // 프론트 로컬 dev 서버(다른 포트)에서 붙을 수 있게 전체 허용. 데모용이라 OK.
@@ -24,6 +25,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/kakaopay', kakaopayRoutes);
 app.use('/api/customs-delay', customsDelayRoutes);
 app.use('/api/business-trend', businessTrendRoutes);
+app.use('/api/product', productRoutes);
 
 // Render에서는 React 빌드 결과도 같은 Express 서버에서 제공한다.
 // 로컬 개발은 기존처럼 Vite(5173) + Express(4000)를 각각 실행할 수 있다.
