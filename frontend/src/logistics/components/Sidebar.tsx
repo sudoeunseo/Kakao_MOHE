@@ -1,6 +1,7 @@
 import React from 'react';
 import { ViewType, UserProfile } from '../types';
 import { Logo } from './Logo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -17,29 +18,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeSellerTab = 'dashboard',
   onSelectSellerTab,
 }) => {
+  const { t } = useLanguage();
   const isSeller = currentView === 'seller' || userProfile.role.includes('판매자');
 
   // Seller Navigation Items
   const sellerMenuItems = [
-    { id: 'dashboard', label: '홈 / 대시보드', icon: 'dashboard' },
-    { id: 'orders', label: '주문 관리', icon: 'package_2' },
-    { id: 'logistics', label: '물류 관리', icon: 'local_shipping' },
-    { id: 'warehouse', label: '배대지 관리', icon: 'home_work' },
-    { id: 'analytics', label: '분석 / 수익분석', icon: 'analytics' },
-    { id: 'inquiries', label: '구매 문의', icon: 'support_agent' },
-    { id: 'settings', label: '설정 / 관리', icon: 'settings' },
+    { id: 'dashboard', label: t('홈 / 대시보드', 'Dashboard'), icon: 'dashboard' },
+    { id: 'orders', label: t('주문 관리', 'Order Management'), icon: 'package_2' },
+    { id: 'logistics', label: t('물류 관리', 'Logistics Management'), icon: 'local_shipping' },
+    { id: 'warehouse', label: t('배대지 관리', 'Warehouse Management'), icon: 'home_work' },
+    { id: 'analytics', label: t('분석 / 수익분석', 'Analytics & Revenue'), icon: 'analytics' },
+    { id: 'inquiries', label: t('구매 문의', 'Customer Inquiries'), icon: 'support_agent' },
+    { id: 'settings', label: t('설정 / 관리', 'Settings'), icon: 'settings' },
   ];
 
   // Buyer Navigation Items
   const buyerMenuItems: { id: ViewType; label: string; icon: string }[] = [
-    { id: 'landing', label: '메인 홈', icon: 'home' },
-    { id: 'search', label: '상품 찾기', icon: 'search' },
-    { id: 'shopping', label: '해외 쇼핑몰', icon: 'storefront' },
-    { id: 'ai-sourcing', label: 'AI 추천 / 스마트 소싱', icon: 'smart_toy' },
-    { id: 'calculator', label: '관부가세 계산기', icon: 'calculate' },
-    { id: 'warehouse', label: '배송조회 / 해외배송센터', icon: 'local_shipping' },
-    { id: 'payments', label: '통관·결제 / 납부내역', icon: 'payments' },
-    { id: 'mypage', label: '마이페이지', icon: 'person' },
+    { id: 'landing', label: t('메인 홈', 'Home'), icon: 'home' },
+    { id: 'search', label: t('상품 찾기', 'Search Products'), icon: 'search' },
+    { id: 'shopping', label: t('해외 쇼핑몰', 'Shopping Malls'), icon: 'storefront' },
+    { id: 'ai-sourcing', label: t('AI 추천 / 스마트 소싱', 'AI Sourcing'), icon: 'smart_toy' },
+    { id: 'calculator', label: t('관부가세 계산기', 'Customs Calculator'), icon: 'calculate' },
+    { id: 'warehouse', label: t('배송조회 / 해외배송센터', 'Shipment Tracking'), icon: 'local_shipping' },
+    { id: 'payments', label: t('통관·결제 / 납부내역', 'Customs & Payments'), icon: 'payments' },
+    { id: 'mypage', label: t('마이페이지', 'My Page'), icon: 'person' },
   ];
 
   if (isSeller) {
@@ -96,9 +98,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
             <div className="overflow-hidden">
               <p className="font-bold text-xs text-white truncate">
-                {userProfile.name === '홍길동' ? '모해 스토어' : userProfile.name}
+                {userProfile.name === '홍길동' ? t('모해 스토어', 'MOHE Store') : userProfile.name}
               </p>
-              <p className="text-[10px] text-[#81E6D9] font-semibold truncate">판매자 관리자</p>
+              <p className="text-[10px] text-[#81E6D9] font-semibold truncate">{t('판매자 관리자', 'Seller Admin')}</p>
             </div>
           </div>
 
@@ -108,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined text-base">logout</span>
-              <span>로그아웃</span>
+              <span>{t('로그아웃', 'Log Out')}</span>
             </button>
           </div>
         </div>
@@ -171,7 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <span className="material-symbols-outlined text-base">logout</span>
-            <span>로그아웃</span>
+            <span>{t('로그아웃', 'Log Out')}</span>
           </button>
         </div>
       </div>

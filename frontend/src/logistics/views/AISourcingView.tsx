@@ -1,5 +1,6 @@
 import React from 'react';
 import { AISourcingItem, ViewType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AISourcingViewProps {
   items: AISourcingItem[];
@@ -9,8 +10,10 @@ interface AISourcingViewProps {
 
 export const AISourcingView: React.FC<AISourcingViewProps> = ({
   items,
+  onNavigate,
   showToast
 }) => {
+  const { t } = useLanguage();
   const mainItem = items[0];
 
   return (
@@ -21,8 +24,8 @@ export const AISourcingView: React.FC<AISourcingViewProps> = ({
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#FFCD00] text-3xl">smart_toy</span>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">AI 스마트 소싱 & 추천</h2>
-              <p className="text-xs text-gray-500 mt-0.5">구매 패턴과 관세 데이터를 학습한 AI가 최적의 해외 소싱처와 단가를 추천합니다.</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('AI 스마트 소싱 & 추천', 'AI Smart Sourcing & Recommendations')}</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{t('구매 패턴과 관세 데이터를 학습한 AI가 최적의 해외 소싱처와 단가를 추천합니다.', 'AI trained on purchasing patterns and customs data recommends optimal suppliers and prices.')}</p>
             </div>
           </div>
         </header>

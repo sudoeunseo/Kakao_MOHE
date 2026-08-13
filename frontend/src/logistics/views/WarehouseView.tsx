@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { WarehousePackage, ViewType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface WarehouseViewProps {
   packages: WarehousePackage[];
@@ -11,8 +12,10 @@ interface WarehouseViewProps {
 export const WarehouseView: React.FC<WarehouseViewProps> = ({
   packages,
   onPayShipping,
+  onNavigate,
   showToast
 }) => {
+  const { t } = useLanguage();
   const [selectedPkgIds, setSelectedPkgIds] = useState<string[]>(['pkg-1', 'pkg-2']);
 
   const toggleSelectPackage = (id: string) => {
@@ -33,15 +36,15 @@ export const WarehouseView: React.FC<WarehouseViewProps> = ({
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">MOHE 해외배송센터</h2>
-            <p className="text-xs text-gray-500 mt-0.5">미국, 일본, 중국 현지 물류센터 입고 현황 및 합배송을 관리하세요.</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t('MOHE 해외배송센터', 'MOHE Global Logistics Center')}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{t('미국, 일본, 중국 현지 물류센터 입고 현황 및 합배송을 관리하세요.', 'Manage local hub arrivals and package consolidation across US, JP, and CN warehouses.')}</p>
           </div>
           <button
-            onClick={() => showToast('새 입고 신청서 작성 모달이 열립니다.')}
-            className="bg-[#1E2A44] text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-[#08152e] transition-all flex items-center gap-1.5 shadow-sm"
+            onClick={() => showToast(t('새 입고 신청서 작성 모달이 열립니다.'))}
+            className="bg-[#1E2A44] text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-[#08152e] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">add</span>
-            배송대행 신청하기
+            {t('배송대행 신청하기', 'Request Fulfillment')}
           </button>
         </div>
 

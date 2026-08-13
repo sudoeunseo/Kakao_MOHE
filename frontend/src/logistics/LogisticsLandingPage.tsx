@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Header } from "./components/Header";
+import { LanguageProvider } from "./context/LanguageContext";
 import { initialUserProfile } from "./data/mockData";
 import type { UserProfile, ViewType } from "./types";
 import { LandingView } from "./views/LandingView";
@@ -52,6 +53,7 @@ function LogisticsLandingPage() {
   }
 
   return (
+    <LanguageProvider lang={lang} onLangChange={setLang}>
     <div className="logistics-root">
       <Header
         currentView="landing"
@@ -66,6 +68,7 @@ function LogisticsLandingPage() {
         <LandingView onNavigate={handleNavigate} />
       </main>
     </div>
+    </LanguageProvider>
   );
 }
 

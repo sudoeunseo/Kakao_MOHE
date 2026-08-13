@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { RecommendedProduct, ViewType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SearchProductViewProps {
   recommendedProducts: RecommendedProduct[];
@@ -14,6 +15,7 @@ export const SearchProductView: React.FC<SearchProductViewProps> = ({
   onNavigate,
   showToast
 }) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 

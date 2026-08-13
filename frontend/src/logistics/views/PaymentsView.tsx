@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction, ViewType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PaymentsViewProps {
   transactions: Transaction[];
@@ -11,10 +12,14 @@ interface PaymentsViewProps {
 export const PaymentsView: React.FC<PaymentsViewProps> = ({
   transactions,
   onPayTransaction,
+  onNavigate,
   showToast
 }) => {
+  const { t } = useLanguage();
   const [filter, setFilter] = useState<'ALL' | 'DUTY' | 'SHIPPING'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Filter logic
   const filteredTxs = transactions.filter((tx) => {
     if (filter === 'DUTY' && tx.category !== '관세') return false;
@@ -40,15 +45,15 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
         {/* Top Title & Download Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">결제·납부내역</h2>
-            <p className="text-xs text-gray-500 mt-0.5">관부가세 및 해외배송비 결제 내역을 확인하고 영수증을 관리하세요.</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t('결제·납부내역', 'Customs & Payment Records')}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{t('관부가세 및 해외배송비 결제 내역을 확인하고 영수증을 관리하세요.', 'Track duties and international shipping fees and manage receipts.')}</p>
           </div>
           <button
-            onClick={() => showToast('전체 결제 내역 엑셀 파일이 다운로드되었습니다.')}
-            className="bg-[#FFCD00] text-[#191919] font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-yellow-400 transition-all flex items-center gap-1.5 shadow-sm"
+            onClick={() => showToast(t('전체 결제 내역 엑셀 파일이 다운로드되었습니다.'))}
+            className="bg-[#FFCD00] text-[#191919] font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-yellow-400 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">download</span>
-            전체 내역 다운로드
+            {t('전체 내역 다운로드')}
           </button>
         </div>
 

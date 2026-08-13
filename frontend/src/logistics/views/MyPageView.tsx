@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserProfile, ShippingAddress, PaymentCard, ViewType } from '../types';
 import { PICTOGRAM_AVATARS } from '../data/mockData';
+import { useLanguage } from '../context/LanguageContext';
 
 interface MyPageViewProps {
   userProfile: UserProfile;
@@ -21,6 +22,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
   onNavigate,
   showToast
 }) => {
+  const { t } = useLanguage();
   const [userName, setUserName] = useState(userProfile.name);
   const [customsCode, setCustomsCode] = useState(userProfile.customsCode);
   const [selectedAvatar, setSelectedAvatar] = useState(userProfile.avatarUrl);
@@ -28,13 +30,13 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
 
   const handleSaveProfile = () => {
     onUpdateUserProfile({ name: userName, customsCode, avatarUrl: selectedAvatar });
-    showToast('프로필 정보가 성공적으로 저장되었습니다!');
+    showToast(t('프로필 정보가 성공적으로 저장되었습니다!'));
   };
 
   const handleSelectPicto = (url: string, name: string) => {
     setSelectedAvatar(url);
     onUpdateUserProfile({ avatarUrl: url });
-    showToast(`프로필 사진이 '${name}'(으)로 변경되었습니다.`);
+    showToast(t(`프로필 사진이 '${name}'(으)로 변경되었습니다.`));
   };
 
   return (
@@ -42,8 +44,8 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <header className="mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">마이페이지</h2>
-          <p className="text-xs md:text-sm text-gray-500">프로필, 해외배송 주문내역, 통관 상태 및 결제 수단을 관리하세요.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{t('마이페이지')}</h2>
+          <p className="text-xs md:text-sm text-gray-500">{t('프로필, 해외배송 주문내역, 통관 상태 및 결제 수단을 관리하세요.')}</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -52,7 +54,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
             {/* Avatar Badge */}
             <span className="absolute top-4 right-4 text-[10px] font-bold bg-[#1E2A44] text-[#FFCD00] px-2 py-0.5 rounded-full flex items-center gap-1">
               <span className="material-symbols-outlined text-[12px]">account_circle</span>
-              프로필 사진
+              {t('프로필 사진')}
             </span>
 
             {/* Avatar Image Display */}
@@ -70,7 +72,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
               className="text-xs font-bold text-[#08152e] hover:text-yellow-600 bg-gray-100 hover:bg-yellow-50 px-3 py-1.5 rounded-lg border border-gray-200 transition-colors flex items-center gap-1 mb-4 cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">photo_camera</span>
-              <span>{showPictoPicker ? '닫기' : '프로필 사진 등록 / 변경'}</span>
+              <span>{showPictoPicker ? t('닫기') : t('프로필 사진 등록 / 변경')}</span>
             </button>
 
             {/* Avatar Selection Options Grid */}
@@ -78,7 +80,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
               <div className="w-full mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl text-left animate-fadeIn">
                 <p className="text-[11px] font-bold text-gray-700 mb-2 flex items-center gap-1">
                   <span className="material-symbols-outlined text-xs">palette</span>
-                  기본 프로필 사진 선택
+                  {t('기본 프로필 사진 선택')}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {PICTOGRAM_AVATARS.map((picto) => {
@@ -98,7 +100,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
                           <img src={picto.url} alt={picto.name} className="w-full h-full object-contain" />
                         </div>
                         <span className="text-[10px] font-semibold text-gray-800 truncate w-full">
-                          {picto.name}
+                          {t(picto.name)}
                         </span>
                       </button>
                     );
@@ -108,7 +110,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
             )}
 
             <div className="mb-2 w-full">
-              <label className="block text-[11px] text-gray-400 font-medium mb-0.5">이름</label>
+              <label className="block text-[11px] text-gray-400 font-medium mb-0.5">{t('이름')}</label>
               <input
                 type="text"
                 value={userName}
@@ -118,7 +120,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
             </div>
 
             <div className="mb-2 w-full">
-              <label className="block text-[11px] text-gray-400 font-medium mb-0.5">개인통관고유부호</label>
+              <label className="block text-[11px] text-gray-400 font-medium mb-0.5">{t('개인통관고유부호')}</label>
               <input
                 type="text"
                 value={customsCode}
@@ -128,14 +130,14 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
             </div>
 
             <p className="text-xs font-semibold text-gray-500 mb-4 bg-gray-100 px-3 py-1 rounded-full">
-              {userProfile.role}
+              {t(userProfile.role)}
             </p>
 
             <button
               onClick={handleSaveProfile}
               className="bg-[#FFCD00] text-[#191919] font-extrabold px-6 py-2.5 rounded-xl text-sm hover:bg-yellow-400 transition-all w-full shadow-sm cursor-pointer"
             >
-              프로필 저장
+              {t('프로필 저장')}
             </button>
           </div>
 
@@ -150,24 +152,24 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
                       <span className="material-symbols-outlined text-xl">local_shipping</span>
                     </div>
                     <div>
-                      <h4 className="text-base font-bold text-gray-900">주문 내역</h4>
-                      <p className="text-[11px] text-gray-500">최근 구매 및 배송 현황</p>
+                      <h4 className="text-base font-bold text-gray-900">{t('주문 내역')}</h4>
+                      <p className="text-[11px] text-gray-500">{t('최근 구매 및 배송 현황')}</p>
                     </div>
                   </div>
                   <span className="bg-blue-100 text-blue-700 font-bold px-2.5 py-1 rounded-full text-xs shrink-0">
-                    3건 진행중
+                    3{t('건 진행중')}
                   </span>
                 </div>
 
                 {/* Most Recent Order Preview Box */}
                 <div className="bg-[#F8F9FB] rounded-xl p-3.5 sm:p-4 border border-[#E1E2E4] mb-3 text-left space-y-2">
                   <div className="flex flex-wrap justify-between items-center gap-1.5 text-[11px] font-bold text-gray-500">
-                    <span className="text-[#08152e] font-extrabold">최근 주문 #MOHE-2026-8801</span>
-                    <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60 shrink-0">미국 델라웨어 센터 입고</span>
+                    <span className="text-[#08152e] font-extrabold">{t('최근 주문')} #MOHE-2026-8801</span>
+                    <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60 shrink-0">{t('미국 델라웨어 센터 입고')}</span>
                   </div>
                   <p className="font-bold text-xs sm:text-sm text-gray-900 leading-snug break-words">무선 기계식 키보드 Retro Edition</p>
                   <div className="flex justify-between items-center text-[11px] text-gray-500 pt-2 border-t border-gray-200/80">
-                    <span>2026.08.10 주문</span>
+                    <span>2026.08.10 {t('주문')}</span>
                     <span className="font-black text-gray-900 text-xs">₩210,000</span>
                   </div>
                 </div>
@@ -177,7 +179,7 @@ export const MyPageView: React.FC<MyPageViewProps> = ({
                 onClick={() => onNavigate('warehouse')}
                 className="text-blue-600 font-bold text-xs hover:underline flex items-center justify-between pt-3 border-t border-gray-100 cursor-pointer"
               >
-                <span>전체 주문 내역 보기 (3건)</span>
+                <span>{t('전체 주문 내역 보기 (3건)')}</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
             </div>

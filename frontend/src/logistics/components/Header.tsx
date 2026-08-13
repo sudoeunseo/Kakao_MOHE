@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ViewType, UserProfile } from '../types';
 import { Logo } from './Logo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HeaderProps {
   currentView: ViewType;
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   isLoggedIn = false,
   onLogout,
 }) => {
+  const { t } = useLanguage();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -41,24 +43,26 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Trailing Actions */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Language Toggle */}
+          {/* Language Toggle with Sliding Animation */}
           <div className="hidden sm:flex bg-[#f2f4f6] rounded-full p-1 border border-[#E1E2E4] items-center relative">
             <button
               type="button"
               onClick={() => onToggleLang('KO')}
-              className={`relative px-3.5 py-1 rounded-full font-bold text-xs transition-all cursor-pointer select-none ${
-                lang === 'KO' ? 'bg-[#FFCD00] text-[#191919] shadow-sm' : 'text-gray-500 hover:text-[#08152e]'
+              className={`relative z-10 px-3.5 py-1 rounded-full font-bold text-xs transition-colors cursor-pointer select-none ${
+                lang === 'KO' ? 'text-[#191919]' : 'text-gray-500 hover:text-[#08152e]'
               }`}
             >
+              {lang === 'KO' && <span className="absolute inset-0 bg-[#FFCD00] rounded-full shadow-sm -z-10" />}
               KO
             </button>
             <button
               type="button"
               onClick={() => onToggleLang('EN')}
-              className={`relative px-3.5 py-1 rounded-full font-bold text-xs transition-all cursor-pointer select-none ${
-                lang === 'EN' ? 'bg-[#FFCD00] text-[#191919] shadow-sm' : 'text-gray-500 hover:text-[#08152e]'
+              className={`relative z-10 px-3.5 py-1 rounded-full font-bold text-xs transition-colors cursor-pointer select-none ${
+                lang === 'EN' ? 'text-[#191919]' : 'text-gray-500 hover:text-[#08152e]'
               }`}
             >
+              {lang === 'EN' && <span className="absolute inset-0 bg-[#FFCD00] rounded-full shadow-sm -z-10" />}
               EN
             </button>
           </div>
@@ -66,11 +70,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Action Button on Landing / Login View */}
           {isLanding ? (
             <button
-              onClick={() => onNavigate(isLoggedIn ? 'mypage' : 'login')}
+              onClick={() => onNavigate('login')}
               className="px-4 py-2 text-xs font-bold bg-[#FFCD00] text-[#191919] rounded-xl hover:bg-yellow-400 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
-              <span className="material-symbols-outlined text-sm">{isLoggedIn ? 'dashboard' : 'login'}</span>
-              {isLoggedIn ? '마이 포털' : '로그인 / 시작하기'}
+              <span className="material-symbols-outlined text-sm">login</span>
+              {t('로그인 / 시작하기', 'Login / Get Started')}
             </button>
           ) : isLogin ? (
             <button
@@ -78,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="px-4 py-2 text-xs font-bold bg-[#1E2A44] text-white rounded-xl hover:bg-[#08152e] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">home</span>
-              메인 홈으로
+              {t('메인 홈으로', 'Main Home')}
             </button>
           ) : isLoggedIn ? (
             <button
@@ -86,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="px-3.5 py-1.5 text-xs font-semibold bg-[#1E2A44] text-white rounded-lg hover:bg-opacity-90 transition-all hidden sm:flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">dashboard</span>
-              {userProfile.role.includes('판매자') || currentView === 'seller' ? '판매자 포털' : '마이 포털'}
+              {userProfile.role.includes('판매자') || currentView === 'seller' ? t('판매자 포털', 'Seller Portal') : t('마이 포털', 'My Portal')}
             </button>
           ) : null}
 
@@ -108,17 +112,17 @@ export const Header: React.FC<HeaderProps> = ({
                 {showNotifications && (
                   <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-4 text-sm">
                     <div className="flex justify-between items-center pb-2 border-b border-gray-100 font-bold text-gray-800">
-                      <span>알림</span>
-                      <span className="text-xs text-[#0058bc] cursor-pointer" onClick={() => setShowNotifications(false)}>모두 읽음</span>
+                      <span>{t('알림')}</span>
+                      <span className="text-xs text-[#0058bc] cursor-pointer" onClick={() => setShowNotifications(false)}>{t('모두 읽음')}</span>
                     </div>
                     <div className="py-2 space-y-3">
                       <div className="p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
-                        <p className="font-semibold text-gray-900">통관 관부가세 납부 안내</p>
-                        <p className="text-xs text-gray-500 mt-0.5">애플 맥북 프로 16인치 관세 ₩45,000 납부 대기 중입니다.</p>
+                        <p className="font-semibold text-gray-900">{t('통관 관부가세 납부 안내')}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{t('애플 맥북 프로 16인치 관세 ₩45,000 납부 대기 중입니다.')}</p>
                       </div>
                       <div className="p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
-                        <p className="font-semibold text-gray-900">미국 델라웨어 센터 입고 완료</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Keychron Q1 Pro 키보드 실측 무게 1.8kg 등록됨.</p>
+                        <p className="font-semibold text-gray-900">{t('미국 델라웨어 센터 입고 완료')}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{t('Keychron Q1 Pro 키보드 실측 무게 1.8kg 등록됨.')}</p>
                       </div>
                     </div>
                   </div>
@@ -129,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => onNavigate('calculator')}
                 className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors flex items-center justify-center cursor-pointer"
-                title="관부가세 계산기 (로그인됨)"
+                title={t('관부가세 계산기')}
               >
                 <span className="material-symbols-outlined text-xl">calculate</span>
               </button>
@@ -142,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="text-gray-700 hover:bg-gray-100 p-1.5 rounded-full transition-colors flex items-center gap-1.5 border border-gray-200 cursor-pointer"
-                title="프로필 메뉴"
+                title={t('프로필 메뉴')}
               >
                 <img
                   src={userProfile.avatarUrl}
@@ -161,9 +165,9 @@ export const Header: React.FC<HeaderProps> = ({
                     />
                     <div>
                       <p className="font-bold text-gray-900">{userProfile.name}</p>
-                      <p className="text-xs text-gray-500">통관번호: {userProfile.customsCode}</p>
+                      <p className="text-xs text-gray-500">{t('통관번호')}: {userProfile.customsCode}</p>
                       <span className="inline-block text-[10px] bg-[#FFCD00] text-[#191919] font-bold px-1.5 py-0.5 rounded mt-0.5">
-                        {userProfile.role}
+                        {t(userProfile.role)}
                       </span>
                     </div>
                   </div>
@@ -172,7 +176,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">person</span>
-                    마이페이지
+                    {t('마이페이지')}
                   </button>
                   <button
                     onClick={() => {
@@ -183,7 +187,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-red-600 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">logout</span>
-                    로그아웃
+                    {t('로그아웃')}
                   </button>
                 </div>
               )}
@@ -192,10 +196,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => onNavigate('login')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-black font-bold text-xs transition-all shadow-sm cursor-pointer"
-              title="로그인 필요"
+              title={t('로그인 필요', 'Login Required')}
             >
               <span className="material-symbols-outlined text-lg text-gray-500">account_circle</span>
-              <span>로그인</span>
+              <span>{t('로그인', 'Login')}</span>
             </button>
           ) : null}
         </div>

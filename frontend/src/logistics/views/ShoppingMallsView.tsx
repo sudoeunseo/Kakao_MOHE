@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShoppingMall, ViewType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ShoppingMallsViewProps {
   malls: ShoppingMall[];
@@ -9,8 +10,10 @@ interface ShoppingMallsViewProps {
 
 export const ShoppingMallsView: React.FC<ShoppingMallsViewProps> = ({
   malls,
+  onNavigate,
   showToast
 }) => {
+  const { t } = useLanguage();
   const [selectedCountry, setSelectedCountry] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -29,8 +32,8 @@ export const ShoppingMallsView: React.FC<ShoppingMallsViewProps> = ({
       <div className="max-w-5xl mx-auto">
         {/* Page Title */}
         <header className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">해외 쇼핑몰</h2>
-          <p className="text-xs text-gray-500 mt-0.5">글로벌 인기 직구 사이트를 한눈에 연결하고 주문을 자동으로 수집하세요.</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('해외 쇼핑몰')}</h2>
+          <p className="text-xs text-gray-500 mt-0.5">{t('글로벌 인기 직구 사이트를 한눈에 연결하고 주문을 자동으로 수집하세요.')}</p>
         </header>
 
         {/* Promo Banner Grid */}
