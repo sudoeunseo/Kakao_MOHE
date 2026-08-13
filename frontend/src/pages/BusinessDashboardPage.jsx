@@ -4,17 +4,27 @@ import { api } from "../api/client";
 import Layout from "../components/Layout";
 import Icon from "../components/Icon";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { getOrderDisplay } from "../utils/orderDisplay";
+import useLanguage from "../context/useLanguage";
 
 const STATUS_STEPS = [
-  { key: "pending", label: "신규 접수" },
-  { key: "paid", label: "결제완료" },
-  { key: "shipping", label: "국제운송" },
-  { key: "customs", label: "통관" },
-  { key: "delivered", label: "배송완료" },
+  { key: "pending", ko: "소싱 접수", en: "Sourcing", icon: "shopping_cart" },
+  { key: "paid", ko: "배송대행지 검수", en: "Hub Inspection", icon: "inventory_2" },
+  { key: "shipping", ko: "국제운송", en: "International", icon: "flight_takeoff", tone: "accent" },
+  { key: "customs", ko: "통관", en: "Customs", icon: "policy", tone: "danger" },
+  { key: "domestic", ko: "국내배송", en: "Domestic", icon: "local_shipping" },
+  { key: "delivered", ko: "셀러 입고", en: "Seller Intake", icon: "check_circle" },
 ];
+
+function formatRevenue(value, language) {
+  if (value >= 100000000) return language === "en" ? `₩${(value / 1000000).toFixed(1)}M` : `₩${(value / 100000000).toFixed(1)}억`;
+  if (value >= 1000000) return `₩${(value / 1000000).toFixed(1)}M`;
+  return `₩${Math.round(value).toLocaleString(language === "en" ? "en-US" : "ko-KR")}`;
+}
 
 function BusinessDashboardPage() {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,77 +73,105 @@ function BusinessDashboardPage() {
     return {
       statusCounts,
       paid: statusCounts.paid || 0,
-      inTransit: (statusCounts.shipping || 0) + (statusCounts.customs || 0),
+      inTransit: statusCounts.shipping || 0,
       riskOrders,
-      maxCount: Math.max(1, ...STATUS_STEPS.map((s) => statusCounts[s.key] || 0)),
+      todayRevenue: orders.reduce(
+        (sum, order) =>
+          sum +
+          (order.ai_estimate?.breakdown?.total_estimated_krw ||
+            (order.price_currency === "KRW" ? Number(order.price_amount) : 0) ||
+            0),
+        0,
+      ),
     };
   }, [orders]);
 
+  const briefingItems = useMemo(() => {
+    const growth = trend?.growth_categories?.[0];
+    const recommendation = trend?.recommendations?.[0];
+
+    return [
+      {
+        icon: "flight_land",
+        title: t("물류 지연 경고", "Logistics Delay Alert"),
+        text:
+          metrics.statusCounts.customs > 0
+            ? t(`현재 통관 단계에 ${metrics.statusCounts.customs}건이 있습니다. 지연 가능 주문을 우선 확인해 주세요.`, `${metrics.statusCounts.customs} orders are currently in customs. Review orders at risk of delay first.`)
+            : t("현재 통관 단계에서 확인된 지연 주문은 없습니다.", "No delayed orders have been detected at customs."),
+      },
+      {
+        icon: "trending_up",
+        title: t("수요 급증 감지", "Demand Surge Detection"),
+        text: growth
+          ? t(`${growth.category}: ${growth.reason}`, "A high-growth product category has been detected from cumulative order data.")
+          : trendLoading
+            ? t("누적 주문 데이터를 분석해 수요 변화를 찾고 있습니다.", "Analyzing cumulative orders for changes in demand.")
+            : t("충분한 주문 데이터가 쌓이면 성장 품목을 안내합니다.", "Growth products will appear once enough order data is available."),
+      },
+      {
+        icon: "hub",
+        title: t("배송대행지 이용 최적화", "Shipping Hub Optimization"),
+        text:
+          (language === "ko" && recommendation) ||
+          (trendError
+            ? t("AI 연결이 지연되고 있습니다. 잠시 후 최신 운영 제안을 다시 확인해 주세요.", "The AI connection is delayed. Please check the latest recommendation again shortly.")
+            : t("카카오 MOHE 배송대행지별 구매·검수·배송 조건을 비교해 유리한 소싱 경로를 준비하고 있습니다.", "Comparing purchasing, inspection, and shipping conditions across Kakao MOHE hubs to find the best sourcing route.")),
+      },
+    ];
+  }, [language, metrics.statusCounts.customs, t, trend, trendError, trendLoading]);
+
   return (
-    <Layout
-      title="홈"
-      description="B2C 주문과 AI 통관 분석을 연결해 운영 위험을 한눈에 파악합니다."
-      actions={
-        <button
-          className="secondary-action compact-action"
-          onClick={() => {
-            loadOrders();
-            loadTrend();
-          }}
-        >
-          데이터 새로고침
-        </button>
-      }
-    >
+    <Layout title={t("홈", "Home")} dashboard>
       {loading ? (
-        <LoadingSpinner label="통합 주문 데이터를 불러오고 있습니다" />
+        <LoadingSpinner label={t("통합 주문 데이터를 불러오고 있습니다", "Loading consolidated order data")} />
       ) : error ? (
         <div className="empty-state error-state">
-          <strong>운영 데이터를 불러오지 못했습니다.</strong>
+          <strong>{t("운영 데이터를 불러오지 못했습니다.", "Could not load operational data.")}</strong>
           <p>{error}</p>
-          <button className="secondary-action" onClick={loadOrders}>다시 시도</button>
+          <button className="secondary-action" onClick={loadOrders}>{t("다시 시도", "Try again")}</button>
         </div>
       ) : (
         <>
-          <section className="kpi-grid">
+          <section className="kpi-grid dashboard-kpi-grid">
             <article className="kpi-card">
-              <div className="kpi-card-head"><span>신규 주문</span><Icon name="shopping_bag" /></div>
-              <strong>{orders.length}</strong>
-              <small>전체 접수된 주문</small>
+              <div className="kpi-card-head"><span>{t("오늘 소싱 주문", "Today's Sourcing Orders")}</span></div>
+              <strong>{orders.length}<small>{t("건", "")}</small></strong>
             </article>
             <article className="kpi-card">
-              <div className="kpi-card-head"><span>결제 완료</span><Icon name="package_2" /></div>
-              <strong>{metrics.paid}</strong>
-              <small>출고 준비 대상</small>
+              <div className="kpi-card-head"><span>{t("배송대행지 검수", "Hub Inspections")}</span></div>
+              <strong>{metrics.paid}<small>{t("건", "")}</small></strong>
             </article>
             <article className="kpi-card">
-              <div className="kpi-card-head"><span>배송 중</span><Icon name="local_shipping" /></div>
-              <strong>{metrics.inTransit}</strong>
-              <small>국제운송 + 통관</small>
+              <div className="kpi-card-head"><span>{t("배송 중", "In Transit")}</span></div>
+              <strong>{metrics.inTransit}<small>{t("건", "")}</small></strong>
             </article>
             <article className="kpi-card warn">
-              <div className="kpi-card-head"><span>주의 필요</span><Icon name="warning" /></div>
-              <strong>{metrics.riskOrders.length}</strong>
-              <small>AI 통관 위험 감지</small>
+              <div className="kpi-card-head"><span><Icon name="warning" /> {t("통관 이슈", "Customs Issues")}</span></div>
+              <strong>{metrics.riskOrders.length}<small>{t("건", "")}</small></strong>
+            </article>
+            <article className="kpi-card">
+              <div className="kpi-card-head"><span>{t("예상 소싱 비용", "Estimated Sourcing Cost")}</span></div>
+              <strong>{formatRevenue(metrics.todayRevenue, language)}</strong>
             </article>
           </section>
 
           <section className="home-grid">
-            <div className="content-card chart-card">
+            <div className="content-card dashboard-status-card">
               <div className="card-heading-row">
-                <div><span>ORDER STATUS</span><h2>상태별 주문 현황</h2></div>
+                <div><h2>{t("소싱·입고 현황", "Sourcing & Intake Status")}</h2></div>
+                <button className="text-link-action" onClick={() => navigate("/business/orders")}>{t("상세보기", "View details")} <Icon name="chevron_right" /></button>
               </div>
-              <div className="bar-chart">
-                {STATUS_STEPS.map((step) => {
+              <div className="dashboard-flow">
+                {STATUS_STEPS.map((step, index) => {
                   const count = metrics.statusCounts[step.key] || 0;
-                  const pct = Math.round((count / metrics.maxCount) * 100);
                   return (
-                    <div key={step.key} className="bar-chart-col">
-                      <span className="bar-chart-value">{count}</span>
-                      <div className="bar-chart-track">
-                        <div className="bar-chart-bar" style={{ height: `${Math.max(pct, count > 0 ? 6 : 2)}%` }} />
+                    <div key={step.key} className={`dashboard-flow-step ${step.tone || ""}`}>
+                      <div className="dashboard-flow-icon">
+                        <Icon name={step.icon} />
                       </div>
-                      <span className="bar-chart-label">{step.label}</span>
+                      <strong>{t(step.ko, step.en)}</strong>
+                      <span>{count.toLocaleString(language === "en" ? "en-US" : "ko-KR")}</span>
+                      {index < STATUS_STEPS.length - 1 && <i aria-hidden="true" />}
                     </div>
                   );
                 })}
@@ -142,44 +180,48 @@ function BusinessDashboardPage() {
 
             <div className="content-card action-card">
               <div className="card-heading-row">
-                <div><span>ACTION NEEDED</span><h2>처리 필요 업무</h2></div>
+                <div className="action-card-title"><Icon name="assignment_late" /><h2>{t("확인이 필요한 업무", "Tasks Requiring Attention")}</h2></div>
               </div>
               {metrics.riskOrders.length === 0 ? (
-                <p className="action-empty">현재 AI가 감지한 통관 위험 주문이 없습니다.</p>
+                <p className="action-empty">{t("현재 AI가 감지한 통관 위험 주문이 없습니다.", "No customs-risk orders are currently detected by AI.")}</p>
               ) : (
                 <ul className="action-list">
-                  {metrics.riskOrders.slice(0, 4).map((order) => (
-                    <li key={order.id}>
-                      <span className="action-icon"><Icon name="error" /></span>
-                      <div>
-                        <strong>{order.product_name}</strong>
-                        <small>#{String(order.id).padStart(4, "0")} · {order.ai_estimate.risk_notes[0]}</small>
-                      </div>
-                    </li>
-                  ))}
+                  {metrics.riskOrders.slice(0, 4).map((order) => {
+                    const display = getOrderDisplay(order, language);
+                    return (
+                      <li key={order.id}>
+                        <span className="action-icon"><Icon name="error" /></span>
+                        <div>
+                          <strong>{display.product}</strong>
+                          <small>#{String(order.id).padStart(4, "0")} · {display.risk}</small>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
               <button className="secondary-action compact-action nav-action" onClick={() => navigate("/business/orders")}>
-                전체 보기
+                {t("전체 보기", "View all")}
               </button>
             </div>
           </section>
 
-          <section className="ai-briefing-band">
-            <span className="ai-briefing-icon"><Icon name="smart_toy" /></span>
-            <div>
-              <h3>MOHE AI 물류 브리핑</h3>
-              {trendLoading ? (
-                <p>AI가 누적 주문을 분석하고 있습니다...</p>
-              ) : trendError ? (
-                <p>브리핑을 불러오지 못했습니다: {trendError}</p>
-              ) : (
-                <p>{trend.summary}</p>
-              )}
-              <button className="text-link-action light" onClick={() => navigate("/business/revenue")}>
-                자세히 보기 <Icon name="arrow_forward" />
-              </button>
+          <section className="dashboard-ai-briefing">
+            <div className="dashboard-ai-heading">
+              <h2><Icon name="bolt" /> {t("모해 AI 브리핑", "MOHE AI Briefing")}</h2>
+              <span>{t("AI 분석 완료", "AI Analysis Complete")}</span>
             </div>
+            <div className="dashboard-ai-grid">
+              {briefingItems.map((item) => (
+                <article key={item.title}>
+                  <h3><Icon name={item.icon} /> {item.title}</h3>
+                  <p>{item.text}</p>
+                </article>
+              ))}
+            </div>
+            <button className="dashboard-ai-more" onClick={() => navigate("/business/revenue")}>
+              {t("상세 분석 보기", "View detailed analysis")} <Icon name="arrow_forward" />
+            </button>
           </section>
         </>
       )}

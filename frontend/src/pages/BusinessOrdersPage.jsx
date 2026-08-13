@@ -3,13 +3,14 @@ import { api, formatDate, formatWon } from "../api/client";
 import Layout from "../components/Layout";
 import Icon from "../components/Icon";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { getOrderDisplay } from "../utils/orderDisplay";
 
 const STATUS_LABEL = {
-  pending: "신규 접수",
-  paid: "결제완료",
+  pending: "소싱 접수",
+  paid: "배송대행지 검수",
   shipping: "국제운송중",
   customs: "통관중",
-  delivered: "배송완료",
+  delivered: "셀러 입고완료",
 };
 
 const STATUS_ICON = {
@@ -91,7 +92,7 @@ function BusinessOrdersPage() {
   return (
     <Layout
       title="주문 관리"
-      description="구매자 주문의 결제·통관·배송 상태를 확인하고 진행 단계를 갱신합니다."
+      description="판매용 해외 상품을 카카오 MOHE 배송대행지로 소싱하고 구매·검수·국제운송·통관·입고 상태를 관리합니다."
       actions={
         <button className="secondary-action compact-action" onClick={loadOrders}>
           데이터 새로고침
@@ -116,7 +117,7 @@ function BusinessOrdersPage() {
         <>
         <section className="content-card pipeline-card">
           <div className="card-heading-row">
-            <div><span>ORDER FLOW</span><h2>주문·배송 현황</h2></div>
+            <div><span>SOURCING FLOW</span><h2>소싱·입고 현황</h2></div>
           </div>
           <div className="pipeline-row">
             {STATUS_OPTIONS.map(([key, label], index) => (
@@ -135,7 +136,7 @@ function BusinessOrdersPage() {
         <div className="dashboard-grid">
           <section className="content-card orders-table-card">
             <div className="card-heading-row">
-              <div><span>LIVE ORDERS</span><h2>통합 주문 현황</h2></div>
+              <div><span>LIVE SOURCING</span><h2>소싱 주문 현황</h2></div>
               <small>최근 주문순</small>
             </div>
             <div className="table-scroll">
@@ -144,20 +145,23 @@ function BusinessOrdersPage() {
                   <tr><th>주문</th><th>상품</th><th>출발국</th><th>예상금액</th><th>AI 신뢰도</th><th>상태</th></tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
-                    <tr
-                      key={order.id}
-                      className={selectedOrder?.id === order.id ? "selected-row" : ""}
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <td>#{String(order.id).padStart(4, "0")}</td>
-                      <td><strong>{order.product_name}</strong><small>{formatDate(order.created_at)}</small></td>
-                      <td>{order.origin_country || "-"}</td>
-                      <td>{order.ai_estimate ? formatWon(order.ai_estimate.breakdown?.total_estimated_krw) : "분석 없음"}</td>
-                      <td><span className={`confidence-tag ${order.ai_estimate?.confidence || "none"}`}>{order.ai_estimate?.confidence || "-"}</span></td>
-                      <td><span className="status-tag">{STATUS_LABEL[order.status] || order.status}</span></td>
-                    </tr>
-                  ))}
+                  {orders.map((order) => {
+                    const display = getOrderDisplay(order);
+                    return (
+                      <tr
+                        key={order.id}
+                        className={selectedOrder?.id === order.id ? "selected-row" : ""}
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        <td>#{String(order.id).padStart(4, "0")}</td>
+                        <td><strong>{display.product}</strong><small>{formatDate(order.created_at)}</small></td>
+                        <td>{order.origin_country || "-"}</td>
+                        <td>{order.ai_estimate ? formatWon(order.ai_estimate.breakdown?.total_estimated_krw) : "분석 없음"}</td>
+                        <td><span className={`confidence-tag ${order.ai_estimate?.confidence || "none"}`}>{order.ai_estimate?.confidence || "-"}</span></td>
+                        <td><span className="status-tag">{STATUS_LABEL[order.status] || order.status}</span></td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -165,9 +169,9 @@ function BusinessOrdersPage() {
 
           <aside className="order-detail-card">
             <div className="detail-heading">
-              <span>ORDER INSIGHT</span>
+              <span>SOURCING INSIGHT</span>
               <h2>주문 #{String(selectedOrder.id).padStart(4, "0")}</h2>
-              <p>{selectedOrder.product_name}</p>
+              <p>{getOrderDisplay(selectedOrder).product}</p>
             </div>
 
             <div className="detail-route">
@@ -211,7 +215,7 @@ function BusinessOrdersPage() {
             {estimate ? (
               <>
                 <div className="detail-grid">
-                  <div><span>품목 분류</span><strong>{estimate.category}</strong></div>
+                  <div><span>품목 분류</span><strong>{getOrderDisplay(selectedOrder).category}</strong></div>
                   <div><span>HS Code</span><strong>{estimate.hs_code_guess}</strong></div>
                   <div><span>관세율</span><strong>{estimate.duty_rate_percent}%</strong></div>
                   <div><span>최종비용</span><strong>{formatWon(estimate.breakdown?.total_estimated_krw)}</strong></div>
@@ -219,7 +223,7 @@ function BusinessOrdersPage() {
                 <div className="detail-risk">
                   <strong>AI 통관 체크</strong>
                   {estimate.risk_notes?.length ? (
-                    <ul>{estimate.risk_notes.map((risk) => <li key={risk}>{risk}</li>)}</ul>
+                    <ul>{getOrderDisplay(selectedOrder).risks.map((risk) => <li key={risk}>{risk}</li>)}</ul>
                   ) : <p>현재 주요 위험요소가 없습니다.</p>}
                 </div>
               </>

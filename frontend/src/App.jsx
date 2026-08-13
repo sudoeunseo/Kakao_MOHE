@@ -13,11 +13,13 @@ import BuyerOrdersPage from "./pages/BuyerOrdersPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
 import BusinessOrdersPage from "./pages/BusinessOrdersPage";
 import BusinessRevenuePage from "./pages/BusinessRevenuePage";
+import BusinessSettingsPage from "./pages/BusinessSettingsPage";
 import LogisticsPreviewPage from "./pages/LogisticsPreviewPage";
 import InquiriesPreviewPage from "./pages/InquiriesPreviewPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import KakaoCallbackPage from "./pages/KakaoCallbackPage";
+import LanguageProvider from "./context/LanguageProvider";
 import "./App.css";
 
 function getStoredUser() {
@@ -50,7 +52,8 @@ function RoleRoute({ role, children }) {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <LanguageProvider>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
 
         <Route path="/login" element={<LoginPage />} />
@@ -150,8 +153,18 @@ function App() {
           }
         />
 
+        <Route
+          path="/business/settings"
+          element={
+            <RoleRoute role="business">
+              <BusinessSettingsPage />
+            </RoleRoute>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+        </Routes>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

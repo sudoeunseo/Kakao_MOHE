@@ -1,16 +1,16 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import Icon from "./Icon";
+import useLanguage from "../context/useLanguage";
 import "../pages/BuyerPortal.css";
 
 const BUSINESS_NAV = [
-  { to: "/business/dashboard", label: "홈", icon: "dashboard" },
-  { to: "/business/orders", label: "주문 관리", icon: "package_2" },
-  { to: "/business/logistics", label: "물류 관리", icon: "local_shipping" },
-  { label: "배송대행지 관리", icon: "home_work", soon: true },
-  { to: "/business/revenue", label: "분석", icon: "analytics" },
-  { to: "/business/inquiries", label: "구매 문의", icon: "support_agent" },
-  { label: "설정/관리", icon: "settings", soon: true },
+  { to: "/business/dashboard", ko: "홈", en: "Home", icon: "dashboard" },
+  { to: "/business/orders", ko: "주문 관리", en: "Orders", icon: "package_2" },
+  { to: "/business/logistics", ko: "배송대행지·재고", en: "Shipping Hubs · Inventory", icon: "local_shipping" },
+  { to: "/business/revenue", ko: "분석", en: "Analytics", icon: "analytics" },
+  { to: "/business/settings", ko: "설정/관리", en: "Settings", icon: "settings" },
+  { to: "/business/inquiries", ko: "구매 문의", en: "Inquiries", icon: "support_agent" },
 ];
 
 const BUYER_MENU = [
@@ -19,8 +19,9 @@ const BUYER_MENU = [
   ["/buyer/orders", "▤", "내 주문·배송 조회"],
 ];
 
-function Layout({ children, title, description, actions, topbarTitle }) {
+function Layout({ children, title, description, actions, topbarTitle, dashboard = false, hideHeading = false }) {
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
   const user = JSON.parse(localStorage.getItem("moheUser") || "{}");
   const isBusiness = user.role === "business";
 
@@ -42,19 +43,18 @@ function Layout({ children, title, description, actions, topbarTitle }) {
           </span>
         </div>
 
-        <nav className="app-navigation" aria-label="주요 메뉴">
+        <nav className="app-navigation" aria-label={t("주요 메뉴", "Main navigation")}>
           {isBusiness ? (
             BUSINESS_NAV.map((item) =>
               item.soon ? (
-                <span key={item.label} className="nav-soon">
+                <span key={item.to} className="nav-soon">
                   <Icon name={item.icon} />
-                  {item.label}
-                  <small>준비중</small>
+                  {t(item.ko, item.en)}
                 </span>
               ) : (
                 <NavLink key={item.to} to={item.to}>
                   <Icon name={item.icon} />
-                  {item.label}
+                  {t(item.ko, item.en)}
                 </NavLink>
               ),
             )
@@ -69,15 +69,21 @@ function Layout({ children, title, description, actions, topbarTitle }) {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-summary">
+          <button
+            type="button"
+            className="user-summary user-summary-link"
+            onClick={() => navigate(isBusiness ? "/business/settings" : "/buyer/home")}
+            aria-label={isBusiness ? t("설정 및 계정 관리로 이동", "Open account settings") : "구매자 홈으로 이동"}
+          >
             <span className="user-avatar">{user.name?.slice(0, 1) || "M"}</span>
             <div>
-              <strong>{user.name || "사용자"}</strong>
-              <span>{isBusiness ? "기업 운영자" : "구매자"}</span>
+              <strong>{user.name || t("사용자", "User")}</strong>
+              <span>{isBusiness ? t("기업 운영자", "Business operator") : "구매자"}</span>
             </div>
-          </div>
+            <Icon name="chevron_right" className="user-summary-arrow" />
+          </button>
           <button type="button" className="text-button" onClick={logout}>
-            로그아웃
+            {t("로그아웃", "Log out")}
           </button>
         </div>
       </aside>
@@ -100,7 +106,7 @@ function Layout({ children, title, description, actions, topbarTitle }) {
             </span>
           </div>
           <button type="button" className="text-button" onClick={logout}>
-            로그아웃
+            {t("로그아웃", "Log out")}
           </button>
         </header>
 
@@ -108,12 +114,26 @@ function Layout({ children, title, description, actions, topbarTitle }) {
           <header className="top-bar">
             <div className="top-bar-search">
               <Icon name="search" />
-              <input type="text" placeholder="주문, 재고 검색..." readOnly />
+              <input type="text" placeholder={t("검색 (주문번호, 상품명)", "Search (order no., product)")} readOnly />
             </div>
             <div className="top-bar-actions">
               <div className="lang-toggle">
-                <button type="button" className="active">KO</button>
-                <button type="button">EN</button>
+                <button
+                  type="button"
+                  className={language === "ko" ? "active" : ""}
+                  aria-pressed={language === "ko"}
+                  onClick={() => setLanguage("ko")}
+                >
+                  KO
+                </button>
+                <button
+                  type="button"
+                  className={language === "en" ? "active" : ""}
+                  aria-pressed={language === "en"}
+                  onClick={() => setLanguage("en")}
+                >
+                  EN
+                </button>
               </div>
               <button type="button" className="icon-button" aria-hidden="true"><Icon name="notifications" /></button>
               <button type="button" className="icon-button" aria-hidden="true"><Icon name="help" /></button>
@@ -121,17 +141,19 @@ function Layout({ children, title, description, actions, topbarTitle }) {
           </header>
         )}
 
-        <main className="page-content">
-          <header className="page-heading">
-            <div>
-              <span className="page-eyebrow">
-                {isBusiness ? "BUSINESS CONTROL TOWER" : "KAKAO MOHE · BUYER PORTAL"}
-              </span>
-              <h1>{title}</h1>
-              {description && <p>{description}</p>}
-            </div>
-            {actions && <div className="page-actions">{actions}</div>}
-          </header>
+        <main className={`page-content ${dashboard ? "dashboard-page-content" : ""}`}>
+          {!dashboard && !hideHeading && (
+            <header className="page-heading">
+              <div>
+                <span className="page-eyebrow">
+                  {isBusiness ? "BUSINESS CONTROL TOWER" : "KAKAO MOHE · BUYER PORTAL"}
+                </span>
+                <h1>{title}</h1>
+                {description && <p>{description}</p>}
+              </div>
+              {actions && <div className="page-actions">{actions}</div>}
+            </header>
+          )}
 
           {children}
         </main>
